@@ -1,0 +1,54 @@
+[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------------------< com.mgx:bank-mock >--------------------------
+[INFO] Building bank-mock 0.0.1-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] 
+[INFO] >>> spring-boot:3.2.5:run (default-cli) > test-compile @ bank-mock >>>
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ bank-mock ---
+[INFO] Copying 1 resource from src/main/resources to target/classes
+[INFO] Copying 0 resource from src/main/resources to target/classes
+[INFO] 
+[INFO] --- compiler:3.11.0:compile (default-compile) @ bank-mock ---
+[INFO] Changes detected - recompiling the module! :input tree
+[INFO] Compiling 2 source files with javac [debug release 17] to target/classes
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ bank-mock ---
+[INFO] skip non existing resourceDirectory /Volumes/Code-CS/LR-Internship/MGX/services/bank-mock/src/test/resources
+[INFO] 
+[INFO] --- compiler:3.11.0:testCompile (default-testCompile) @ bank-mock ---
+[INFO] No sources to compile
+[INFO] 
+[INFO] <<< spring-boot:3.2.5:run (default-cli) < test-compile @ bank-mock <<<
+[INFO] 
+[INFO] 
+[INFO] --- spring-boot:3.2.5:run (default-cli) @ bank-mock ---
+[INFO] Attaching agents: []
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::                (v3.2.5)
+
+2025-12-21T18:33:43.383+05:30  INFO 71880 --- [           main] com.mgx.bankmock.BankMockApplication     : Starting BankMockApplication using Java 25.0.1 with PID 71880 (/Volumes/Code-CS/LR-Internship/MGX/services/bank-mock/target/classes started by krishhiv in /Volumes/Code-CS/LR-Internship/MGX/services/bank-mock)
+2025-12-21T18:33:43.384+05:30  INFO 71880 --- [           main] com.mgx.bankmock.BankMockApplication     : No active profile set, falling back to 1 default profile: "default"
+WARNING: A restricted method in java.lang.System has been called
+WARNING: java.lang.System::load has been called by org.apache.tomcat.jni.Library in an unnamed module (file:/Users/krishhiv/.m2/repository/org/apache/tomcat/embed/tomcat-embed-core/10.1.20/tomcat-embed-core-10.1.20.jar)
+WARNING: Use --enable-native-access=ALL-UNNAMED to avoid a warning for callers in this module
+WARNING: Restricted methods will be blocked in a future release unless native access is enabled
+
+2025-12-21T18:33:43.687+05:30  INFO 71880 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8091 (http)
+2025-12-21T18:33:43.700+05:30  INFO 71880 --- [           main] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-12-21T18:33:43.700+05:30  INFO 71880 --- [           main] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.20]
+2025-12-21T18:33:43.719+05:30  INFO 71880 --- [           main] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-12-21T18:33:43.719+05:30  INFO 71880 --- [           main] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 317 ms
+2025-12-21T18:33:43.844+05:30  INFO 71880 --- [           main] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8091 (http) with context path ''
+2025-12-21T18:33:43.848+05:30  INFO 71880 --- [           main] com.mgx.bankmock.BankMockApplication     : Started BankMockApplication in 0.615 seconds (process running for 0.728)
+2025-12-21T18:34:17.847+05:30  INFO 71880 --- [nio-8091-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-12-21T18:34:17.847+05:30  INFO 71880 --- [nio-8091-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-12-21T18:34:17.848+05:30  INFO 71880 --- [nio-8091-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms

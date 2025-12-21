@@ -1,0 +1,6 @@
+{
+    "java.project.sourcePaths": [
+        "services/fx-mock/src/main/java"
+    ],
+    "java.compile.nullAnalysis.mode": "disabled"
+}
