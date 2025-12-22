@@ -1,4 +1,26 @@
-# Demo Flows (Clean Commands)
+# Demo Flows
+
+## Server Start Commands (Run in parallel terminal shells)
+
+1) Backend:
+```bash
+./backend/mvnw -f backend/pom.xml spring-boot:run
+```
+
+2) Redis:
+```bash
+brew services start redis
+```
+
+3) FX Mock:
+```bash
+./backend/mvnw -f services/fx-mock/pom.xml spring-boot:run
+```
+
+4) Bank Mock:
+```bash
+./backend/mvnw -f services/bank-mock/pom.xml spring-boot:run
+```
 
 
 ## Flow A - Admin setup (developer + game + rates + FX)
