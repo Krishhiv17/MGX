@@ -9,3 +9,16 @@ YwYzM0MjMzY2UiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6IkFETUlOIiwiaWF
 "userId":"7f908ff6-a8c8-4baa-b864-0ef0c34233ce",
 "email":"admin@example.com",
 "role":"ADMIN"}% 
+
+
+USER TOKEN:
+
+curl -X POST http://localhost:8081/v1/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"user@example.com","password":"test1234"}'
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJjNzc1YjgwNC03NzIzLTQxYjQtYWFmZC1mNT
+diZTcwMDNiMDYiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI
+6MTc2NjM4MzI5NSwiZXhwIjoxNzY2Mzg2ODk1fQ.SM0wCmm_PR28TY8Jpf1mHwi7p6mRD1oq5t0x59oOcBw",
+"userId":"c775b804-7723-41b4-aafd-f57be7003b06",
+"email":"user@example.com",
+"role":"USER"}%

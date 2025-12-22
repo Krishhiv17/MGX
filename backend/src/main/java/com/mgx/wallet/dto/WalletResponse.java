@@ -10,14 +10,16 @@ public class WalletResponse {
   private UUID id;
   private WalletType type;
   private UUID gameId;
+  private String gameName;
   private BigDecimal balance;
   private OffsetDateTime createdAt;
 
-  public static WalletResponse from(Wallet wallet) {
+  public static WalletResponse from(Wallet wallet, String gameName) {
     WalletResponse response = new WalletResponse();
     response.setId(wallet.getId());
     response.setType(wallet.getType());
     response.setGameId(wallet.getGameId());
+    response.setGameName(gameName);
     response.setBalance(wallet.getBalance());
     response.setCreatedAt(wallet.getCreatedAt());
     return response;
@@ -45,6 +47,14 @@ public class WalletResponse {
 
   public void setGameId(UUID gameId) {
     this.gameId = gameId;
+  }
+
+  public String getGameName() {
+    return gameName;
+  }
+
+  public void setGameName(String gameName) {
+    this.gameName = gameName;
   }
 
   public BigDecimal getBalance() {

@@ -20,6 +20,10 @@ public class IdempotencyService {
     return Boolean.TRUE.equals(success);
   }
 
+  public void storeResult(String key, String value) {
+    redisTemplate.opsForValue().set(key, value, DEFAULT_TTL);
+  }
+
   public Optional<String> getExistingResult(String key) {
     return Optional.ofNullable(redisTemplate.opsForValue().get(key));
   }

@@ -11,7 +11,6 @@ import jakarta.persistence.Table;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 @Table(name = "receivables")
@@ -52,7 +51,6 @@ public class Receivable {
   @Column(name = "settlement_batch_id")
   private UUID settlementBatchId;
 
-  @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
 
