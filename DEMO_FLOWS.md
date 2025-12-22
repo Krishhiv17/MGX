@@ -1,6 +1,5 @@
 # Demo Flows (Clean Commands)
 
-Use these flows to demo the system end-to-end. Assumes backend + redis + fx-mock + bank-mock + rabbitmq are running.
 
 ## Flow A - Admin setup (developer + game + rates + FX)
 
