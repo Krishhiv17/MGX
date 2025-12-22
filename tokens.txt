@@ -1,0 +1,11 @@
+ADMIN TOKEN:
+
+curl -X POST http://localhost:8081/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"admin@example.com","password":"admin1234","role":"ADMIN"}'
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI3ZjkwOGZmNi1hOGM4LTRiYWEtYjg2NC0wZW
+YwYzM0MjMzY2UiLCJlbWFpbCI6ImFkbWluQGV4YW1wbGUuY29tIiwicm9sZSI6IkFETUlOIiwiaWF
+0IjoxNzY2MzgxMzU1LCJleHAiOjE3NjYzODQ5NTV9.n7klkLMVCa66SyXh_qytuZjTecQDWYh8Y48DLwlTdgk",
+"userId":"7f908ff6-a8c8-4baa-b864-0ef0c34233ce",
+"email":"admin@example.com",
+"role":"ADMIN"}% 
