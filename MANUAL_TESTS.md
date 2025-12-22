@@ -198,3 +198,110 @@ Check UGC wallet for a game:
 psql -h localhost -U mgx_user -d mgx_db -c \
 "SELECT id, balance FROM wallets WHERE user_id = '<USER_ID>' AND type = 'UGC' AND game_id = '<GAME_ID>';"
 ```
+
+## Phase 9 - Settlement
+
+Start RabbitMQ (Docker):
+```bash
+docker run --name mgx-rabbit -p 5672:5672 -p 15672:15672 -d rabbitmq:3-management
+```
+
+Start bank mock:
+```bash
+./backend/mvnw -f services/bank-mock/pom.xml spring-boot:run
+```
+
+Register developer user:
+```bash
+curl -X POST http://localhost:8081/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"dev@example.com","password":"dev1234","role":"DEVELOPER"}'
+```
+
+Get developer ids:
+```bash
+psql -h localhost -U mgx_user -d mgx_db -c \
+"SELECT id, name FROM developers;"
+```
+
+List receivables:
+```bash
+curl "http://localhost:8081/v1/developer/receivables?developerId=<DEV_ID>&status=UNSETTLED" \
+  -H "Authorization: Bearer <DEV_TOKEN>"
+```
+
+Request settlement:
+```bash
+curl -X POST http://localhost:8081/v1/developer/settlements/request \
+  -H "Authorization: Bearer <DEV_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"developerId":"<DEV_ID>"}'
+```
+
+List batches:
+```bash
+curl "http://localhost:8081/v1/developer/settlements?developerId=<DEV_ID>" \
+  -H "Authorization: Bearer <DEV_TOKEN>"
+```
+
+Get batch details:
+```bash
+curl http://localhost:8081/v1/developer/settlements/<BATCH_ID> \
+  -H "Authorization: Bearer <DEV_TOKEN>"
+```
+
+List settled receivables:
+```bash
+curl "http://localhost:8081/v1/developer/receivables?developerId=<DEV_ID>&status=SETTLED" \
+  -H "Authorization: Bearer <DEV_TOKEN>"
+```
+
+Developer per game (DB):
+```bash
+psql -h localhost -U mgx_user -d mgx_db -c \
+"SELECT g.id AS game_id, g.name AS game_name, g.developer_id, d.name AS developer_name FROM games g JOIN developers d ON d.id = g.developer_id ORDER BY g.name;"
+```
+
+## Phase 10 - Admin (Games/Developers)
+
+Create developer:
+```bash
+curl -X POST http://localhost:8081/v1/admin/developers \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Acme Games","settlementCurrency":"USD","bankAccountRef":"BANK-ACME-001"}'
+```
+
+List developers:
+```bash
+curl http://localhost:8081/v1/admin/developers \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+Create game:
+```bash
+curl -X POST http://localhost:8081/v1/admin/games \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"developerId":"<DEV_ID>","name":"SpaceRacer","settlementCurrency":"USD"}'
+```
+
+List games:
+```bash
+curl http://localhost:8081/v1/admin/games \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+Get game:
+```bash
+curl http://localhost:8081/v1/admin/games/<GAME_ID> \
+  -H "Authorization: Bearer <ADMIN_TOKEN>"
+```
+
+Update game status:
+```bash
+curl -X PUT http://localhost:8081/v1/admin/games/<GAME_ID>/status \
+  -H "Authorization: Bearer <ADMIN_TOKEN>" \
+  -H "Content-Type: application/json" \
+  -d '{"status":"INACTIVE"}'
+```

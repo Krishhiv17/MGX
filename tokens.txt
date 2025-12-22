@@ -22,3 +22,16 @@ diZTcwMDNiMDYiLCJlbWFpbCI6InVzZXJAZXhhbXBsZS5jb20iLCJyb2xlIjoiVVNFUiIsImlhdCI
 "userId":"c775b804-7723-41b4-aafd-f57be7003b06",
 "email":"user@example.com",
 "role":"USER"}%
+
+
+DEVELOPER TOKEN:
+
+curl -X POST http://localhost:8081/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"email":"dev@example.com","password":"dev1234","role":"DEVELOPER"}'
+{"token":"eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiI1NmI3Mzc2Yy04MDM5LTRiMDEtYmI1ZC1jMGZjNTljNjE
+2OGMiLCJlbWFpbCI6ImRldkBleGFtcGxlLmNvbSIsInJvbGUiOiJERVZFTE9QRVIiLCJpYXQiOjE3NjYzODY2M
+DksImV4cCI6MTc2NjM5MDIwOX0.DWnl5SONEPpBxUAQ8hKML1b9c5JgPJz35XRYigZcjxY",
+"userId":"56b7376c-8039-4b01-bb5d-c0fc59c6168c",
+"email":"dev@example.com",
+"role":"DEVELOPER"}% 

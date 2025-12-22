@@ -20,8 +20,10 @@ mgx:
     secret: change-me-please-change-me-please-32-bytes
     expiration-ms: 3600000
   fx:
-    local-url: http://localhost:8090/fx/rates
+    local-url: http://localhost:8092/fx/rates
     window-hours: 12
+  bank:
+    local-url: http://localhost:8091/payouts
   rabbitmq:
     host: localhost
     port: 5672

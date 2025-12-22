@@ -1,44 +1,30 @@
-package com.mgx.game.model;
+package com.mgx.game.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.mgx.game.model.Game;
+import com.mgx.game.model.GameStatus;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
 
-@Entity
-@Table(name = "games")
-public class Game {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+public class GameResponse {
   private UUID id;
-
-  @Column(name = "developer_id", nullable = false)
   private UUID developerId;
-
-  @Column(name = "developer_name")
   private String developerName;
-
-  @Column(name = "name", nullable = false)
   private String name;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false)
   private GameStatus status;
-
-  @Column(name = "settlement_currency", nullable = false)
   private String settlementCurrency;
-
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
+
+  public static GameResponse from(Game game) {
+    GameResponse response = new GameResponse();
+    response.setId(game.getId());
+    response.setDeveloperId(game.getDeveloperId());
+    response.setDeveloperName(game.getDeveloperName());
+    response.setName(game.getName());
+    response.setStatus(game.getStatus());
+    response.setSettlementCurrency(game.getSettlementCurrency());
+    response.setCreatedAt(game.getCreatedAt());
+    return response;
+  }
 
   public UUID getId() {
     return id;

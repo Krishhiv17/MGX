@@ -1,44 +1,30 @@
-package com.mgx.developer.model;
+package com.mgx.developer.dto;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.mgx.developer.model.Developer;
+import com.mgx.developer.model.DeveloperStatus;
 import java.time.OffsetDateTime;
 import java.util.UUID;
-import org.hibernate.annotations.CreationTimestamp;
 
-@Entity
-@Table(name = "developers")
-public class Developer {
-
-  @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
+public class DeveloperResponse {
   private UUID id;
-
-  @Column(name = "name", nullable = false)
-  private String name;
-
-  @Column(name = "settlement_currency", nullable = false)
-  private String settlementCurrency;
-
-  @Column(name = "bank_account_ref", nullable = false)
-  private String bankAccountRef;
-
-  @Column(name = "user_id")
   private UUID userId;
-
-  @Enumerated(EnumType.STRING)
-  @Column(name = "status", nullable = false)
+  private String name;
+  private String settlementCurrency;
+  private String bankAccountRef;
   private DeveloperStatus status;
-
-  @CreationTimestamp
-  @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
+
+  public static DeveloperResponse from(Developer developer) {
+    DeveloperResponse response = new DeveloperResponse();
+    response.setId(developer.getId());
+    response.setUserId(developer.getUserId());
+    response.setName(developer.getName());
+    response.setSettlementCurrency(developer.getSettlementCurrency());
+    response.setBankAccountRef(developer.getBankAccountRef());
+    response.setStatus(developer.getStatus());
+    response.setCreatedAt(developer.getCreatedAt());
+    return response;
+  }
 
   public UUID getId() {
     return id;
@@ -46,6 +32,14 @@ public class Developer {
 
   public void setId(UUID id) {
     this.id = id;
+  }
+
+  public UUID getUserId() {
+    return userId;
+  }
+
+  public void setUserId(UUID userId) {
+    this.userId = userId;
   }
 
   public String getName() {
@@ -70,14 +64,6 @@ public class Developer {
 
   public void setBankAccountRef(String bankAccountRef) {
     this.bankAccountRef = bankAccountRef;
-  }
-
-  public UUID getUserId() {
-    return userId;
-  }
-
-  public void setUserId(UUID userId) {
-    this.userId = userId;
   }
 
   public DeveloperStatus getStatus() {
