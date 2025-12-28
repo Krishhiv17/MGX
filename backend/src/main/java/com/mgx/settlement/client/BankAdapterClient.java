@@ -9,17 +9,17 @@ import org.springframework.web.client.RestTemplate;
 @Component
 public class BankAdapterClient {
   private final RestTemplate restTemplate;
-  private final String bankUrl;
+  private final String baseUrl;
 
   public BankAdapterClient(
     RestTemplateBuilder restTemplateBuilder,
-    @Value("${mgx.bank.local-url}") String bankUrl
+    @Value("${mgx.bank.base-url}") String baseUrl
   ) {
     this.restTemplate = restTemplateBuilder.build();
-    this.bankUrl = bankUrl;
+    this.baseUrl = baseUrl;
   }
 
   public void sendPayout(PayoutRequest request) {
-    restTemplate.postForObject(bankUrl, request, String.class);
+    restTemplate.postForObject(baseUrl + "/payouts", request, String.class);
   }
 }

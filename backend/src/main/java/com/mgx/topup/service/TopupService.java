@@ -1,6 +1,9 @@
 package com.mgx.topup.service;
 
+import com.mgx.bank.client.BankPointsClient;
+import com.mgx.bank.dto.PointsBalanceResponse;
 import com.mgx.common.exception.IdempotencyConflictException;
+import com.mgx.common.exception.InsufficientBalanceException;
 import com.mgx.common.util.ValidationUtil;
 import com.mgx.common.service.IdempotencyService;
 import com.mgx.ledger.model.AssetType;
@@ -17,6 +20,7 @@ import com.mgx.wallet.model.WalletType;
 import com.mgx.wallet.service.WalletService;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
@@ -31,19 +35,22 @@ public class TopupService {
   private final WalletService walletService;
   private final LedgerService ledgerService;
   private final IdempotencyService idempotencyService;
+  private final BankPointsClient bankPointsClient;
 
   public TopupService(
     TopupRepository topupRepository,
     RateService rateService,
     WalletService walletService,
     LedgerService ledgerService,
-    IdempotencyService idempotencyService
+    IdempotencyService idempotencyService,
+    BankPointsClient bankPointsClient
   ) {
     this.topupRepository = topupRepository;
     this.rateService = rateService;
     this.walletService = walletService;
     this.ledgerService = ledgerService;
     this.idempotencyService = idempotencyService;
+    this.bankPointsClient = bankPointsClient;
   }
 
   @Transactional
@@ -84,6 +91,17 @@ public class TopupService {
     Wallet pointsWallet = walletService.getWalletByUserAndType(userId, WalletType.REWARD_POINTS, null);
     Wallet mgcWallet = walletService.getWalletByUserAndType(userId, WalletType.MGC, null);
 
+    PointsBalanceResponse bankAfterDebit;
+    try {
+      bankAfterDebit = bankPointsClient.debitPoints(userId, pointsDebited);
+    } catch (Exception ex) {
+      throw new InsufficientBalanceException("Unable to debit points");
+    }
+    if (bankAfterDebit == null || bankAfterDebit.getPointsAvailable() == null) {
+      throw new InsufficientBalanceException("Unable to debit points");
+    }
+    walletService.setBalance(pointsWallet.getId(), bankAfterDebit.getPointsAvailable());
+
     Topup topup = new Topup();
     topup.setUserId(userId);
     topup.setPointsDebited(pointsDebited);
@@ -95,7 +113,6 @@ public class TopupService {
 
     Topup saved = topupRepository.save(topup);
 
-    walletService.updateBalance(pointsWallet.getId(), pointsDebited, LedgerDirection.DEBIT);
     walletService.updateBalance(mgcWallet.getId(), mgcCredited, LedgerDirection.CREDIT);
 
     ledgerService.createEntry(
@@ -118,5 +135,9 @@ public class TopupService {
 
     idempotencyService.storeResult(redisKey, saved.getId().toString());
     return saved;
+  }
+
+  public List<Topup> listTopups(UUID userId) {
+    return topupRepository.findByUserIdOrderByCreatedAtDesc(userId);
   }
 }

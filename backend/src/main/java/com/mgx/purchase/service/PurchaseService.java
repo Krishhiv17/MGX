@@ -189,4 +189,8 @@ public class PurchaseService {
 
     receivableRepository.save(receivable);
   }
+
+  public List<Purchase> listPurchases(UUID userId) {
+    return purchaseRepository.findByUserIdOrderByCreatedAtDesc(userId);
+  }
 }

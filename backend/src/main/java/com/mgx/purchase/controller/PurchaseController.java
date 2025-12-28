@@ -5,8 +5,11 @@ import com.mgx.purchase.dto.PurchaseRequest;
 import com.mgx.purchase.dto.PurchaseResponse;
 import com.mgx.purchase.model.Purchase;
 import com.mgx.purchase.service.PurchaseService;
+import java.util.List;
+import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -37,5 +40,13 @@ public class PurchaseController {
       idempotencyKey
     );
     return PurchaseResponse.from(purchase);
+  }
+
+  @GetMapping
+  @PreAuthorize("hasRole('USER')")
+  public List<PurchaseResponse> listPurchases(@AuthenticationPrincipal JwtUserPrincipal principal) {
+    return purchaseService.listPurchases(principal.getUserId()).stream()
+      .map(PurchaseResponse::from)
+      .collect(Collectors.toList());
   }
 }

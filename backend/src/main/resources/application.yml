@@ -23,7 +23,7 @@ mgx:
     local-url: http://localhost:8092/fx/rates
     window-hours: 12
   bank:
-    local-url: http://localhost:8091/payouts
+    base-url: http://localhost:8091
   rabbitmq:
     host: localhost
     port: 5672

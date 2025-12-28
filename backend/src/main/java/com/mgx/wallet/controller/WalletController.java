@@ -31,21 +31,33 @@ public class WalletController {
   }
 
   @GetMapping
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("isAuthenticated()")
   public List<WalletResponse> getWallets(@AuthenticationPrincipal JwtUserPrincipal principal) {
+    if (principal == null) {
+      throw new AccessDeniedException("Access denied");
+    }
     List<Wallet> wallets = walletService.getWalletsByUserId(principal.getUserId());
     Map<UUID, String> gameNames = loadGameNames(wallets);
     return wallets.stream()
-      .map(wallet -> WalletResponse.from(wallet, gameNames.get(wallet.getGameId())))
+      .map(wallet -> {
+        String gameName = null;
+        if (wallet.getType() == WalletType.UGC && wallet.getGameId() != null) {
+          gameName = gameNames.get(wallet.getGameId());
+        }
+        return WalletResponse.from(wallet, gameName);
+      })
       .collect(Collectors.toList());
   }
 
   @GetMapping("/{walletId}")
-  @PreAuthorize("hasRole('USER')")
+  @PreAuthorize("isAuthenticated()")
   public WalletResponse getWallet(
     @AuthenticationPrincipal JwtUserPrincipal principal,
     @PathVariable UUID walletId
   ) {
+    if (principal == null) {
+      throw new AccessDeniedException("Access denied");
+    }
     Wallet wallet = walletService.getWalletById(walletId);
     if (!wallet.getUserId().equals(principal.getUserId())) {
       throw new AccessDeniedException("Access denied");

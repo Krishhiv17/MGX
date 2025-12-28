@@ -72,4 +72,20 @@ public class WalletService {
 
     throw new IllegalStateException("Failed to update wallet balance");
   }
+
+  public Wallet setBalance(UUID walletId, BigDecimal newBalance) {
+    for (int attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        Wallet wallet = getWalletById(walletId);
+        wallet.setBalance(newBalance);
+        return walletRepository.save(wallet);
+      } catch (OptimisticLockingFailureException ex) {
+        if (attempt == MAX_RETRIES - 1) {
+          throw ex;
+        }
+      }
+    }
+
+    throw new IllegalStateException("Failed to set wallet balance");
+  }
 }
