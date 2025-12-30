@@ -1,0 +1,3 @@
+ALL SERVERS TOGETHER - ./scripts/start-all.sh
+BACKEND ONLY - ./scripts/start-backend.sh
+FRONTEND ONLY - ./scripts/start-frontend .sh

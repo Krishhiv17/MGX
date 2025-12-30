@@ -62,10 +62,17 @@ public class FxService {
     }
 
     OffsetDateTime now = OffsetDateTime.now();
-    FxRateWindow window = windowRepository.findCurrentWindow(now, FxWindowStatus.SUCCESS)
-      .orElseThrow(() -> new FxWindowNotFoundException("No active FX window"));
-    cacheWindow(window);
-    return window;
+    Optional<FxRateWindow> existing = windowRepository.findCurrentWindow(now, FxWindowStatus.SUCCESS);
+    if (existing.isPresent()) {
+      cacheWindow(existing.get());
+      return existing.get();
+    }
+
+    FxRateWindow refreshed = refreshFxRates();
+    if (refreshed.getStatus() != FxWindowStatus.SUCCESS) {
+      throw new FxWindowNotFoundException("No active FX window");
+    }
+    return refreshed;
   }
 
   public List<FxRate> getFxRatesForWindow(UUID windowId) {

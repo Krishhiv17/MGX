@@ -14,6 +14,7 @@ import java.time.OffsetDateTime;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,17 +28,20 @@ public class RateService {
   private final RateMgcUgcRepository mgcUgcRepository;
   private final StringRedisTemplate redisTemplate;
   private final ObjectMapper objectMapper;
+  private final BigDecimal defaultUgcPerMgc;
 
   public RateService(
     RatePointsMgcRepository pointsMgcRepository,
     RateMgcUgcRepository mgcUgcRepository,
     StringRedisTemplate redisTemplate,
-    ObjectMapper objectMapper
+    ObjectMapper objectMapper,
+    @Value("${mgx.rates.default-ugc-per-mgc:0}") BigDecimal defaultUgcPerMgc
   ) {
     this.pointsMgcRepository = pointsMgcRepository;
     this.mgcUgcRepository = mgcUgcRepository;
     this.redisTemplate = redisTemplate;
     this.objectMapper = objectMapper;
+    this.defaultUgcPerMgc = defaultUgcPerMgc == null ? BigDecimal.ZERO : defaultUgcPerMgc;
   }
 
   public RatePointsMgc getActivePointsToMgcRate() {
@@ -61,8 +65,13 @@ public class RateService {
     }
 
     OffsetDateTime now = OffsetDateTime.now();
-    RateMgcUgc rate = mgcUgcRepository.findActiveRateByGameId(gameId, now)
-      .orElseThrow(() -> new RateNotFoundException("Active MGC to UGC rate not found"));
+    RateMgcUgc rate = mgcUgcRepository.findActiveRateByGameId(gameId, now).orElse(null);
+    if (rate == null) {
+      if (defaultUgcPerMgc.signum() <= 0) {
+        throw new RateNotFoundException("Active MGC to UGC rate not found");
+      }
+      rate = createMgcUgcRate(gameId, defaultUgcPerMgc, now, null);
+    }
     cacheRate(key, rate, ttlFor(rate.getActiveTo()));
     return rate;
   }

@@ -5,18 +5,22 @@ import ProtectedRoute from "../../components/ProtectedRoute";
 import TransactionList, { type TransactionItem } from "../../components/TransactionList";
 import { listPurchases } from "../../lib/api/purchase";
 import { listTopups } from "../../lib/api/topup";
+import { listGames } from "../../lib/api/games";
 
 export default function TransactionsPage() {
   const [items, setItems] = useState<TransactionItem[]>([]);
   const [loading, setLoading] = useState(true);
+  const [gameNameById, setGameNameById] = useState<Record<string, string>>({});
 
   useEffect(() => {
     let active = true;
-    Promise.all([listTopups(), listPurchases()])
-      .then(([topups, purchases]) => {
+    Promise.all([listTopups(), listPurchases(), listGames()])
+      .then(([topups, purchases, games]) => {
         if (!active) {
           return;
         }
+        const gameMap = Object.fromEntries(games.map((game) => [game.id, game.name]));
+        setGameNameById(gameMap);
         const combined: TransactionItem[] = [
           ...topups.map((item) => ({ ...item, kind: "TOPUP" as const })),
           ...purchases.map((item) => ({ ...item, kind: "PURCHASE" as const })),
@@ -26,6 +30,7 @@ export default function TransactionsPage() {
       .catch(() => {
         if (active) {
           setItems([]);
+          setGameNameById({});
         }
       })
       .finally(() => {
@@ -38,10 +43,6 @@ export default function TransactionsPage() {
       active = false;
     };
   }, []);
-
-  const sorted = useMemo(() => {
-    return [...items].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [items]);
 
   return (
     <ProtectedRoute>
@@ -60,7 +61,7 @@ export default function TransactionsPage() {
           {loading ? (
             <p className="text-sm text-zinc-500">Loading transactions...</p>
           ) : (
-            <TransactionList items={sorted} />
+            <TransactionList items={items} gameNameById={gameNameById} />
           )}
         </div>
       </main>

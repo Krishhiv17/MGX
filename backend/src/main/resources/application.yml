@@ -24,6 +24,8 @@ mgx:
     window-hours: 12
   bank:
     base-url: http://localhost:8091
+  rates:
+    default-ugc-per-mgc: 75
   rabbitmq:
     host: localhost
     port: 5672
