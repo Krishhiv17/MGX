@@ -1,5 +1,6 @@
 package com.mgx.game.controller;
 
+import com.mgx.auth.security.JwtUserPrincipal;
 import com.mgx.common.util.ValidationUtil;
 import com.mgx.developer.model.Developer;
 import com.mgx.developer.repository.DeveloperRepository;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -34,7 +36,10 @@ public class GameController {
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
-  public GameResponse createGame(@RequestBody CreateGameRequest request) {
+  public GameResponse createGame(
+    @AuthenticationPrincipal JwtUserPrincipal principal,
+    @RequestBody CreateGameRequest request
+  ) {
     if (request.getDeveloperId() == null) {
       throw new IllegalArgumentException("developerId is required");
     }
@@ -47,7 +52,9 @@ public class GameController {
     game.setDeveloperName(developer.getName());
     game.setName(request.getName());
     game.setSettlementCurrency(request.getSettlementCurrency());
-    game.setStatus(request.getStatus() == null ? GameStatus.ACTIVE : request.getStatus());
+    game.setStatus(GameStatus.ACTIVE);
+    game.setApprovedBy(principal.getUserId());
+    game.setApprovedAt(java.time.OffsetDateTime.now());
 
     return GameResponse.from(gameRepository.save(game));
   }
@@ -80,6 +87,34 @@ public class GameController {
     }
 
     game.setStatus(request.getStatus());
+    return GameResponse.from(gameRepository.save(game));
+  }
+
+  @PostMapping("/{gameId}/approve")
+  @PreAuthorize("hasRole('ADMIN')")
+  public GameResponse approveGame(
+    @AuthenticationPrincipal JwtUserPrincipal principal,
+    @PathVariable UUID gameId
+  ) {
+    Game game = gameRepository.findById(gameId)
+      .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+    game.setStatus(GameStatus.ACTIVE);
+    game.setApprovedBy(principal.getUserId());
+    game.setApprovedAt(java.time.OffsetDateTime.now());
+    return GameResponse.from(gameRepository.save(game));
+  }
+
+  @PostMapping("/{gameId}/reject")
+  @PreAuthorize("hasRole('ADMIN')")
+  public GameResponse rejectGame(
+    @AuthenticationPrincipal JwtUserPrincipal principal,
+    @PathVariable UUID gameId
+  ) {
+    Game game = gameRepository.findById(gameId)
+      .orElseThrow(() -> new IllegalArgumentException("Game not found"));
+    game.setStatus(GameStatus.REJECTED);
+    game.setApprovedBy(principal.getUserId());
+    game.setApprovedAt(java.time.OffsetDateTime.now());
     return GameResponse.from(gameRepository.save(game));
   }
 }

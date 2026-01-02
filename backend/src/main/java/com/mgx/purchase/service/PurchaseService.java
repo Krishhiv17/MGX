@@ -9,6 +9,7 @@ import com.mgx.fx.model.FxRate;
 import com.mgx.fx.model.FxRateWindow;
 import com.mgx.fx.service.FxService;
 import com.mgx.game.model.Game;
+import com.mgx.game.model.GameStatus;
 import com.mgx.game.repository.GameRepository;
 import com.mgx.ledger.model.AssetType;
 import com.mgx.ledger.model.LedgerDirection;
@@ -22,6 +23,7 @@ import com.mgx.rates.service.RateService;
 import com.mgx.settlement.model.Receivable;
 import com.mgx.settlement.model.ReceivableStatus;
 import com.mgx.settlement.repository.ReceivableRepository;
+import com.mgx.user.repository.UserRepository;
 import com.mgx.wallet.model.Wallet;
 import com.mgx.wallet.model.WalletType;
 import com.mgx.wallet.service.WalletService;
@@ -45,6 +47,7 @@ public class PurchaseService {
   private final GameRepository gameRepository;
   private final FxService fxService;
   private final ReceivableRepository receivableRepository;
+  private final UserRepository userRepository;
   private final IdempotencyService idempotencyService;
 
   public PurchaseService(
@@ -55,6 +58,7 @@ public class PurchaseService {
     GameRepository gameRepository,
     FxService fxService,
     ReceivableRepository receivableRepository,
+    UserRepository userRepository,
     IdempotencyService idempotencyService
   ) {
     this.purchaseRepository = purchaseRepository;
@@ -64,6 +68,7 @@ public class PurchaseService {
     this.gameRepository = gameRepository;
     this.fxService = fxService;
     this.receivableRepository = receivableRepository;
+    this.userRepository = userRepository;
     this.idempotencyService = idempotencyService;
   }
 
@@ -97,6 +102,9 @@ public class PurchaseService {
 
     Game game = gameRepository.findById(gameId)
       .orElseThrow(() -> new GameNotFoundException("Game not found"));
+    if (game.getStatus() != GameStatus.ACTIVE) {
+      throw new IllegalArgumentException("Game is not active");
+    }
 
     RateMgcUgc rate = rateService.getActiveMgcToUgcRate(gameId);
     BigDecimal ugcPerMgc = rate.getUgcPerMgc();
@@ -114,8 +122,21 @@ public class PurchaseService {
       mgcSpent = ugcCredited.divide(ugcPerMgc, SCALE, RoundingMode.HALF_UP);
     }
 
-    Wallet mgcWallet = walletService.getWalletByUserAndType(userId, WalletType.MGC, null);
-    Wallet ugcWallet = walletService.getOrCreateWallet(userId, WalletType.UGC, gameId);
+    String countryCode = userRepository.findById(userId)
+      .map(user -> user.getCountryCode())
+      .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    Wallet mgcWallet = walletService.getWalletByUserAndType(
+      userId,
+      WalletType.MGC,
+      null,
+      countryCode
+    );
+    Wallet ugcWallet = walletService.getOrCreateWallet(
+      userId,
+      WalletType.UGC,
+      gameId,
+      countryCode
+    );
 
     Purchase purchase = new Purchase();
     purchase.setUserId(userId);

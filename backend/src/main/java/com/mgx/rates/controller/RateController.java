@@ -8,8 +8,10 @@ import com.mgx.rates.dto.PointsMgcRateResponse;
 import com.mgx.rates.model.RateMgcUgc;
 import com.mgx.rates.model.RatePointsMgc;
 import com.mgx.rates.service.RateService;
+import java.util.UUID;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -50,6 +52,26 @@ public class RateController {
       request.getActiveFrom(),
       principal.getUserId()
     );
+    return MgcUgcRateResponse.from(rate);
+  }
+
+  @PostMapping("/mgc-ugc/{rateId}/approve")
+  @PreAuthorize("hasRole('ADMIN')")
+  public MgcUgcRateResponse approveMgcUgcRate(
+    @AuthenticationPrincipal JwtUserPrincipal principal,
+    @PathVariable UUID rateId
+  ) {
+    RateMgcUgc rate = rateService.approveMgcUgcRate(rateId, principal.getUserId());
+    return MgcUgcRateResponse.from(rate);
+  }
+
+  @PostMapping("/mgc-ugc/{rateId}/reject")
+  @PreAuthorize("hasRole('ADMIN')")
+  public MgcUgcRateResponse rejectMgcUgcRate(
+    @AuthenticationPrincipal JwtUserPrincipal principal,
+    @PathVariable UUID rateId
+  ) {
+    RateMgcUgc rate = rateService.rejectMgcUgcRate(rateId, principal.getUserId());
     return MgcUgcRateResponse.from(rate);
   }
 }

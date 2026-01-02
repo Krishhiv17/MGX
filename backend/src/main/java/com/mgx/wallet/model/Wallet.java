@@ -32,6 +32,9 @@ public class Wallet {
   @Column(name = "game_id")
   private UUID gameId;
 
+  @Column(name = "country_code", nullable = false)
+  private String countryCode;
+
   @Column(name = "balance", nullable = false, precision = 38, scale = 12)
   private BigDecimal balance;
 
@@ -73,6 +76,14 @@ public class Wallet {
 
   public void setGameId(UUID gameId) {
     this.gameId = gameId;
+  }
+
+  public String getCountryCode() {
+    return countryCode;
+  }
+
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
   }
 
   public BigDecimal getBalance() {

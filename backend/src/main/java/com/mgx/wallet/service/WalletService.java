@@ -22,8 +22,8 @@ public class WalletService {
     this.walletRepository = walletRepository;
   }
 
-  public List<Wallet> getWalletsByUserId(UUID userId) {
-    return walletRepository.findByUserId(userId);
+  public List<Wallet> getWalletsByUserId(UUID userId, String countryCode) {
+    return walletRepository.findByUserIdAndCountryCode(userId, countryCode);
   }
 
   public Wallet getWalletById(UUID walletId) {
@@ -31,18 +31,19 @@ public class WalletService {
       .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
   }
 
-  public Wallet getWalletByUserAndType(UUID userId, WalletType type, UUID gameId) {
-    return walletRepository.findByUserIdAndTypeAndGameId(userId, type, gameId)
+  public Wallet getWalletByUserAndType(UUID userId, WalletType type, UUID gameId, String countryCode) {
+    return walletRepository.findByUserIdAndTypeAndGameIdAndCountryCode(userId, type, gameId, countryCode)
       .orElseThrow(() -> new WalletNotFoundException("Wallet not found"));
   }
 
-  public Wallet getOrCreateWallet(UUID userId, WalletType type, UUID gameId) {
-    return walletRepository.findByUserIdAndTypeAndGameId(userId, type, gameId)
+  public Wallet getOrCreateWallet(UUID userId, WalletType type, UUID gameId, String countryCode) {
+    return walletRepository.findByUserIdAndTypeAndGameIdAndCountryCode(userId, type, gameId, countryCode)
       .orElseGet(() -> {
         Wallet wallet = new Wallet();
         wallet.setUserId(userId);
         wallet.setType(type);
         wallet.setGameId(gameId);
+        wallet.setCountryCode(countryCode);
         wallet.setBalance(BigDecimal.ZERO);
         return walletRepository.save(wallet);
       });

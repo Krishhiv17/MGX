@@ -2,6 +2,8 @@ package com.mgx.rates.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -33,6 +35,16 @@ public class RateMgcUgc {
 
   @Column(name = "created_by")
   private UUID createdBy;
+
+  @Enumerated(EnumType.STRING)
+  @Column(name = "status", nullable = false)
+  private RateStatus status;
+
+  @Column(name = "approved_by")
+  private UUID approvedBy;
+
+  @Column(name = "approved_at")
+  private OffsetDateTime approvedAt;
 
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
@@ -84,6 +96,30 @@ public class RateMgcUgc {
 
   public void setCreatedBy(UUID createdBy) {
     this.createdBy = createdBy;
+  }
+
+  public RateStatus getStatus() {
+    return status;
+  }
+
+  public void setStatus(RateStatus status) {
+    this.status = status;
+  }
+
+  public UUID getApprovedBy() {
+    return approvedBy;
+  }
+
+  public void setApprovedBy(UUID approvedBy) {
+    this.approvedBy = approvedBy;
+  }
+
+  public OffsetDateTime getApprovedAt() {
+    return approvedAt;
+  }
+
+  public void setApprovedAt(OffsetDateTime approvedAt) {
+    this.approvedAt = approvedAt;
   }
 
   public OffsetDateTime getCreatedAt() {

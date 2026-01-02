@@ -15,6 +15,7 @@ import com.mgx.rates.service.RateService;
 import com.mgx.topup.model.Topup;
 import com.mgx.topup.model.TopupStatus;
 import com.mgx.topup.repository.TopupRepository;
+import com.mgx.user.repository.UserRepository;
 import com.mgx.wallet.model.Wallet;
 import com.mgx.wallet.model.WalletType;
 import com.mgx.wallet.service.WalletService;
@@ -36,6 +37,7 @@ public class TopupService {
   private final LedgerService ledgerService;
   private final IdempotencyService idempotencyService;
   private final BankPointsClient bankPointsClient;
+  private final UserRepository userRepository;
 
   public TopupService(
     TopupRepository topupRepository,
@@ -43,7 +45,8 @@ public class TopupService {
     WalletService walletService,
     LedgerService ledgerService,
     IdempotencyService idempotencyService,
-    BankPointsClient bankPointsClient
+    BankPointsClient bankPointsClient,
+    UserRepository userRepository
   ) {
     this.topupRepository = topupRepository;
     this.rateService = rateService;
@@ -51,6 +54,7 @@ public class TopupService {
     this.ledgerService = ledgerService;
     this.idempotencyService = idempotencyService;
     this.bankPointsClient = bankPointsClient;
+    this.userRepository = userRepository;
   }
 
   @Transactional
@@ -88,8 +92,21 @@ public class TopupService {
       pointsDebited = mgcCredited.multiply(pointsPerMgc).setScale(SCALE, RoundingMode.HALF_UP);
     }
 
-    Wallet pointsWallet = walletService.getWalletByUserAndType(userId, WalletType.REWARD_POINTS, null);
-    Wallet mgcWallet = walletService.getWalletByUserAndType(userId, WalletType.MGC, null);
+    String countryCode = userRepository.findById(userId)
+      .map(user -> user.getCountryCode())
+      .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    Wallet pointsWallet = walletService.getWalletByUserAndType(
+      userId,
+      WalletType.REWARD_POINTS,
+      null,
+      countryCode
+    );
+    Wallet mgcWallet = walletService.getWalletByUserAndType(
+      userId,
+      WalletType.MGC,
+      null,
+      countryCode
+    );
 
     PointsBalanceResponse bankAfterDebit;
     try {

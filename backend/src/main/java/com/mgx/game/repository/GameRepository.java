@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface GameRepository extends JpaRepository<Game, UUID> {
   List<Game> findByStatus(GameStatus status);
+
+  List<Game> findByDeveloperId(UUID developerId);
 }

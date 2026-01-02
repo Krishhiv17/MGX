@@ -12,6 +12,8 @@ public class DeveloperResponse {
   private String settlementCurrency;
   private String bankAccountRef;
   private DeveloperStatus status;
+  private UUID approvedBy;
+  private OffsetDateTime approvedAt;
   private OffsetDateTime createdAt;
 
   public static DeveloperResponse from(Developer developer) {
@@ -22,6 +24,8 @@ public class DeveloperResponse {
     response.setSettlementCurrency(developer.getSettlementCurrency());
     response.setBankAccountRef(developer.getBankAccountRef());
     response.setStatus(developer.getStatus());
+    response.setApprovedBy(developer.getApprovedBy());
+    response.setApprovedAt(developer.getApprovedAt());
     response.setCreatedAt(developer.getCreatedAt());
     return response;
   }
@@ -72,6 +76,22 @@ public class DeveloperResponse {
 
   public void setStatus(DeveloperStatus status) {
     this.status = status;
+  }
+
+  public UUID getApprovedBy() {
+    return approvedBy;
+  }
+
+  public void setApprovedBy(UUID approvedBy) {
+    this.approvedBy = approvedBy;
+  }
+
+  public OffsetDateTime getApprovedAt() {
+    return approvedAt;
+  }
+
+  public void setApprovedAt(OffsetDateTime approvedAt) {
+    this.approvedAt = approvedAt;
   }
 
   public OffsetDateTime getCreatedAt() {

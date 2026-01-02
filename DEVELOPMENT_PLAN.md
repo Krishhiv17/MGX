@@ -1026,7 +1026,7 @@
 
 ## Phase 13: Frontend - Developer Dashboard
 **Duration**: 2-3 days  
-**Goal**: Build developer receivables and settlement UI
+**Goal**: Build developer receivables + settlement UI, plus developer game creation and rate proposals
 
 ### Tasks
 
@@ -1036,6 +1036,8 @@
   - `requestSettlement()`
   - `getSettlementBatches()`
   - `getSettlementBatch(batchId)`
+  - `createGame(name, settlementCurrency)` (developer submits for approval)
+  - `createGameRate(gameId, ugcPerMgc)` (developer submits for approval)
 
 **Files to create:**
 - `frontend/lib/api/developer.ts`
@@ -1048,11 +1050,15 @@
   - List unsettled receivables
   - Button to request settlement
   - List settlement batches with status
+  - Create/add games (pending admin approval)
+  - Propose MGC→UGC rates per game (pending admin approval)
 
 **Files to create:**
 - `frontend/app/developer/dashboard/page.tsx`
 - `frontend/components/ReceivableCard.tsx`
 - `frontend/components/SettlementBatchCard.tsx`
+  - `frontend/components/DeveloperGameForm.tsx`
+  - `frontend/components/RateProposalForm.tsx`
 
 **Time estimate**: 5-6 hours
 
@@ -1067,13 +1073,13 @@
 
 **Time estimate**: 3-4 hours
 
-**Deliverable**: Developers can view receivables, trigger settlements, view settlement history
+**Deliverable**: Developers can view receivables, trigger settlements, view settlement history, and submit games/rates for approval
 
 ---
 
 ## Phase 14: Frontend - Admin Panel
 **Duration**: 2-3 days  
-**Goal**: Build admin UI for rates, games, and FX management
+**Goal**: Build admin UI for approvals, rates, games, and FX management
 
 ### Tasks
 
@@ -1081,10 +1087,15 @@
 - [ ] Create admin API functions:
   - `createPointsMgcRate(pointsPerMgc)`
   - `createMgcUgcRate(gameId, ugcPerMgc)`
+  - `approveGame(gameId)` / `rejectGame(gameId)`
+  - `approveGameRate(rateId)` / `rejectGameRate(rateId)`
+  - `approveDeveloper(developerId)` / `rejectDeveloper(developerId)`
+  - `listDeveloperAccounts()` (with unsettled totals)
+  - `listAllTransactions()` (topups, purchases, receivables)
   - `refreshFxRates()`
   - `getFxWindows()`
-  - `createGame(developerId, name, settlementCurrency)`
-  - `createDeveloper(name, settlementCurrency, bankAccountRef)`
+  - `createGame(developerId, name, settlementCurrency)` (admin-verified path)
+  - `createDeveloper(name, settlementCurrency, bankAccountRef)` (admin-verified path)
 
 **Files to create:**
 - `frontend/lib/api/admin.ts`
@@ -1095,6 +1106,7 @@
 - [ ] Create admin dashboard (`/admin/dashboard`)
   - Overview of system stats
   - Quick actions (refresh FX, create rate, etc.)
+  - Pending approvals (developers, games, rate changes)
 
 **Files to create:**
 - `frontend/app/admin/dashboard/page.tsx`
@@ -1127,27 +1139,32 @@
 #### 14.5 Create Game Management Page
 - [ ] Create game management page (`/admin/games`)
   - Form to create new game
-  - List all games
+  - List all games with approval status
+  - Approve/reject pending games
   - Activate/deactivate games
 
 **Files to create:**
 - `frontend/app/admin/games/page.tsx`
 - `frontend/components/GameForm.tsx`
+  - `frontend/components/GameApprovalTable.tsx`
 
 **Time estimate**: 3-4 hours
 
 #### 14.6 Create Developer Management Page
 - [ ] Create developer management page (`/admin/developers`)
   - Form to create new developer
-  - List all developers
+  - List all developers with approval status
+  - Approve/reject developers
+  - Show unsettled totals per developer
 
 **Files to create:**
 - `frontend/app/admin/developers/page.tsx`
 - `frontend/components/DeveloperForm.tsx`
+  - `frontend/components/DeveloperApprovalTable.tsx`
 
 **Time estimate**: 2-3 hours
 
-**Deliverable**: Admins can manage rates, FX, games, and developers through UI
+**Deliverable**: Admins can approve developers/games/rates, manage rates/FX, and view developer exposure & transactions
 
 ---
 
@@ -1335,4 +1352,3 @@
 - Use git branches for features, commit frequently
 
 Good luck with the development! 🚀
-

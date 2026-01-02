@@ -26,6 +26,15 @@ public class User {
   @Column(name = "password_hash", nullable = false)
   private String passwordHash;
 
+  @Column(name = "phone_number")
+  private String phoneNumber;
+
+  @Column(name = "country_code", nullable = false)
+  private String countryCode;
+
+  @Column(name = "phone_verified_at")
+  private OffsetDateTime phoneVerifiedAt;
+
   @Enumerated(EnumType.STRING)
   @Column(name = "role", nullable = false)
   private UserRole role;
@@ -56,6 +65,30 @@ public class User {
 
   public void setPasswordHash(String passwordHash) {
     this.passwordHash = passwordHash;
+  }
+
+  public String getPhoneNumber() {
+    return phoneNumber;
+  }
+
+  public void setPhoneNumber(String phoneNumber) {
+    this.phoneNumber = phoneNumber;
+  }
+
+  public String getCountryCode() {
+    return countryCode;
+  }
+
+  public void setCountryCode(String countryCode) {
+    this.countryCode = countryCode;
+  }
+
+  public OffsetDateTime getPhoneVerifiedAt() {
+    return phoneVerifiedAt;
+  }
+
+  public void setPhoneVerifiedAt(OffsetDateTime phoneVerifiedAt) {
+    this.phoneVerifiedAt = phoneVerifiedAt;
   }
 
   public UserRole getRole() {

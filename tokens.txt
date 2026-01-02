@@ -35,3 +35,10 @@ DksImV4cCI6MTc2NjM5MDIwOX0.DWnl5SONEPpBxUAQ8hKML1b9c5JgPJz35XRYigZcjxY",
 "userId":"56b7376c-8039-4b01-bb5d-c0fc59c6168c",
 "email":"dev@example.com",
 "role":"DEVELOPER"}% 
+
+
+ADMING LOGIN:
+
+curl -s -X POST http://localhost:8081/v1/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin@mgx.local","password":"Admin123!","role":"ADMIN","phoneNumber":"+15550000001","countryCode":"US"}'

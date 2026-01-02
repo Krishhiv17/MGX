@@ -3,6 +3,7 @@ package com.mgx.settlement.repository;
 import com.mgx.settlement.model.Receivable;
 import com.mgx.settlement.model.ReceivableStatus;
 import java.util.List;
+import java.math.BigDecimal;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -18,4 +19,15 @@ public interface ReceivableRepository extends JpaRepository<Receivable, UUID> {
     nativeQuery = true
   )
   List<Receivable> findUnsettledByDeveloperIdForUpdate(@Param("developerId") UUID developerId);
+
+  @Query(
+    "SELECT r.developerId as developerId, COALESCE(SUM(r.amountDue), 0) as totalAmount " +
+    "FROM Receivable r WHERE r.status = :status GROUP BY r.developerId"
+  )
+  List<DeveloperTotal> sumAmountsByDeveloperAndStatus(@Param("status") ReceivableStatus status);
+
+  interface DeveloperTotal {
+    UUID getDeveloperId();
+    BigDecimal getTotalAmount();
+  }
 }

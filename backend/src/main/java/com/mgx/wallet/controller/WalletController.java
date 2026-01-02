@@ -7,6 +7,7 @@ import com.mgx.wallet.dto.WalletResponse;
 import com.mgx.wallet.model.Wallet;
 import com.mgx.wallet.model.WalletType;
 import com.mgx.wallet.service.WalletService;
+import com.mgx.user.repository.UserRepository;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -24,10 +25,16 @@ import org.springframework.web.bind.annotation.RestController;
 public class WalletController {
   private final WalletService walletService;
   private final GameRepository gameRepository;
+  private final UserRepository userRepository;
 
-  public WalletController(WalletService walletService, GameRepository gameRepository) {
+  public WalletController(
+    WalletService walletService,
+    GameRepository gameRepository,
+    UserRepository userRepository
+  ) {
     this.walletService = walletService;
     this.gameRepository = gameRepository;
+    this.userRepository = userRepository;
   }
 
   @GetMapping
@@ -36,7 +43,10 @@ public class WalletController {
     if (principal == null) {
       throw new AccessDeniedException("Access denied");
     }
-    List<Wallet> wallets = walletService.getWalletsByUserId(principal.getUserId());
+    String countryCode = userRepository.findById(principal.getUserId())
+      .map(user -> user.getCountryCode())
+      .orElseThrow(() -> new AccessDeniedException("Access denied"));
+    List<Wallet> wallets = walletService.getWalletsByUserId(principal.getUserId(), countryCode);
     Map<UUID, String> gameNames = loadGameNames(wallets);
     return wallets.stream()
       .map(wallet -> {

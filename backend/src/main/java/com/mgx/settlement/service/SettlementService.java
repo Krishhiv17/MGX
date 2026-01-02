@@ -46,6 +46,7 @@ public class SettlementService {
 
   public UUID resolveDeveloperId(UUID userId) {
     return developerRepository.findByUserId(userId)
+      .filter(dev -> dev.getStatus() == com.mgx.developer.model.DeveloperStatus.ACTIVE)
       .map(Developer::getId)
       .orElseThrow(() -> new ReceivableNotFoundException("Developer not linked to user"));
   }
@@ -54,6 +55,9 @@ public class SettlementService {
   public SettlementBatch requestSettlement(UUID developerId, UUID requestedBy) {
     Developer developer = developerRepository.findById(developerId)
       .orElseThrow(() -> new ReceivableNotFoundException("Developer not found"));
+    if (developer.getStatus() != com.mgx.developer.model.DeveloperStatus.ACTIVE) {
+      throw new ReceivableNotFoundException("Developer is not active");
+    }
 
     SettlementBatch batch = new SettlementBatch();
     batch.setDeveloperId(developerId);

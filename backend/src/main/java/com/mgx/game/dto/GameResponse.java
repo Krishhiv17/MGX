@@ -11,6 +11,8 @@ public class GameResponse {
   private String developerName;
   private String name;
   private GameStatus status;
+  private UUID approvedBy;
+  private OffsetDateTime approvedAt;
   private String settlementCurrency;
   private OffsetDateTime createdAt;
 
@@ -21,6 +23,8 @@ public class GameResponse {
     response.setDeveloperName(game.getDeveloperName());
     response.setName(game.getName());
     response.setStatus(game.getStatus());
+    response.setApprovedBy(game.getApprovedBy());
+    response.setApprovedAt(game.getApprovedAt());
     response.setSettlementCurrency(game.getSettlementCurrency());
     response.setCreatedAt(game.getCreatedAt());
     return response;
@@ -64,6 +68,22 @@ public class GameResponse {
 
   public void setStatus(GameStatus status) {
     this.status = status;
+  }
+
+  public UUID getApprovedBy() {
+    return approvedBy;
+  }
+
+  public void setApprovedBy(UUID approvedBy) {
+    this.approvedBy = approvedBy;
+  }
+
+  public OffsetDateTime getApprovedAt() {
+    return approvedAt;
+  }
+
+  public void setApprovedAt(OffsetDateTime approvedAt) {
+    this.approvedAt = approvedAt;
   }
 
   public String getSettlementCurrency() {

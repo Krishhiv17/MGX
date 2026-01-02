@@ -8,7 +8,12 @@ import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface WalletRepository extends JpaRepository<Wallet, UUID> {
-  List<Wallet> findByUserId(UUID userId);
+  List<Wallet> findByUserIdAndCountryCode(UUID userId, String countryCode);
 
-  Optional<Wallet> findByUserIdAndTypeAndGameId(UUID userId, WalletType type, UUID gameId);
+  Optional<Wallet> findByUserIdAndTypeAndGameIdAndCountryCode(
+    UUID userId,
+    WalletType type,
+    UUID gameId,
+    String countryCode
+  );
 }

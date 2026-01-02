@@ -36,6 +36,12 @@ public class Developer {
   @Column(name = "status", nullable = false)
   private DeveloperStatus status;
 
+  @Column(name = "approved_by")
+  private UUID approvedBy;
+
+  @Column(name = "approved_at")
+  private OffsetDateTime approvedAt;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -86,6 +92,22 @@ public class Developer {
 
   public void setStatus(DeveloperStatus status) {
     this.status = status;
+  }
+
+  public UUID getApprovedBy() {
+    return approvedBy;
+  }
+
+  public void setApprovedBy(UUID approvedBy) {
+    this.approvedBy = approvedBy;
+  }
+
+  public OffsetDateTime getApprovedAt() {
+    return approvedAt;
+  }
+
+  public void setApprovedAt(OffsetDateTime approvedAt) {
+    this.approvedAt = approvedAt;
   }
 
   public OffsetDateTime getCreatedAt() {

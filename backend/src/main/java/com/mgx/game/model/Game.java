@@ -33,6 +33,12 @@ public class Game {
   @Column(name = "status", nullable = false)
   private GameStatus status;
 
+  @Column(name = "approved_by")
+  private UUID approvedBy;
+
+  @Column(name = "approved_at")
+  private OffsetDateTime approvedAt;
+
   @Column(name = "settlement_currency", nullable = false)
   private String settlementCurrency;
 
@@ -78,6 +84,22 @@ public class Game {
 
   public void setStatus(GameStatus status) {
     this.status = status;
+  }
+
+  public UUID getApprovedBy() {
+    return approvedBy;
+  }
+
+  public void setApprovedBy(UUID approvedBy) {
+    this.approvedBy = approvedBy;
+  }
+
+  public OffsetDateTime getApprovedAt() {
+    return approvedAt;
+  }
+
+  public void setApprovedAt(OffsetDateTime approvedAt) {
+    this.approvedAt = approvedAt;
   }
 
   public String getSettlementCurrency() {

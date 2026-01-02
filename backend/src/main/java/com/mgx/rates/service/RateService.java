@@ -6,6 +6,7 @@ import com.mgx.common.exception.RateNotFoundException;
 import com.mgx.common.util.ValidationUtil;
 import com.mgx.rates.model.RateMgcUgc;
 import com.mgx.rates.model.RatePointsMgc;
+import com.mgx.rates.model.RateStatus;
 import com.mgx.rates.repository.RateMgcUgcRepository;
 import com.mgx.rates.repository.RatePointsMgcRepository;
 import java.math.BigDecimal;
@@ -65,7 +66,7 @@ public class RateService {
     }
 
     OffsetDateTime now = OffsetDateTime.now();
-    RateMgcUgc rate = mgcUgcRepository.findActiveRateByGameId(gameId, now).orElse(null);
+    RateMgcUgc rate = mgcUgcRepository.findActiveRateByGameId(gameId, now, RateStatus.APPROVED).orElse(null);
     if (rate == null) {
       if (defaultUgcPerMgc.signum() <= 0) {
         throw new RateNotFoundException("Active MGC to UGC rate not found");
@@ -111,7 +112,7 @@ public class RateService {
     ValidationUtil.requirePositive(ugcPerMgc, "ugcPerMgc");
     OffsetDateTime now = OffsetDateTime.now();
 
-    mgcUgcRepository.findActiveRateByGameId(gameId, now).ifPresent(existing -> {
+    mgcUgcRepository.findActiveRateByGameId(gameId, now, RateStatus.APPROVED).ifPresent(existing -> {
       existing.setActiveTo(now);
       mgcUgcRepository.save(existing);
     });
@@ -122,10 +123,66 @@ public class RateService {
     rate.setActiveFrom(activeFrom == null ? now : activeFrom);
     rate.setActiveTo(null);
     rate.setCreatedBy(createdBy);
+    rate.setStatus(RateStatus.APPROVED);
+    rate.setApprovedBy(createdBy);
+    rate.setApprovedAt(now);
 
     RateMgcUgc saved = mgcUgcRepository.save(rate);
     redisTemplate.delete(mgcUgcKey(gameId));
     return saved;
+  }
+
+  @Transactional
+  public RateMgcUgc proposeMgcUgcRate(
+    UUID gameId,
+    BigDecimal ugcPerMgc,
+    OffsetDateTime activeFrom,
+    UUID createdBy
+  ) {
+    ValidationUtil.requirePositive(ugcPerMgc, "ugcPerMgc");
+    OffsetDateTime now = OffsetDateTime.now();
+
+    RateMgcUgc rate = new RateMgcUgc();
+    rate.setGameId(gameId);
+    rate.setUgcPerMgc(ugcPerMgc);
+    rate.setActiveFrom(activeFrom == null ? now : activeFrom);
+    rate.setActiveTo(null);
+    rate.setCreatedBy(createdBy);
+    rate.setStatus(RateStatus.PENDING);
+
+    return mgcUgcRepository.save(rate);
+  }
+
+  @Transactional
+  public RateMgcUgc approveMgcUgcRate(UUID rateId, UUID approvedBy) {
+    OffsetDateTime now = OffsetDateTime.now();
+    RateMgcUgc rate = mgcUgcRepository.findById(rateId)
+      .orElseThrow(() -> new RateNotFoundException("Rate not found"));
+
+    mgcUgcRepository.findActiveRateByGameId(rate.getGameId(), now, RateStatus.APPROVED).ifPresent(existing -> {
+      existing.setActiveTo(now);
+      mgcUgcRepository.save(existing);
+    });
+
+    rate.setStatus(RateStatus.APPROVED);
+    rate.setApprovedBy(approvedBy);
+    rate.setApprovedAt(now);
+    rate.setActiveFrom(rate.getActiveFrom() == null ? now : rate.getActiveFrom());
+    rate.setActiveTo(null);
+
+    RateMgcUgc saved = mgcUgcRepository.save(rate);
+    redisTemplate.delete(mgcUgcKey(rate.getGameId()));
+    return saved;
+  }
+
+  @Transactional
+  public RateMgcUgc rejectMgcUgcRate(UUID rateId, UUID approvedBy) {
+    RateMgcUgc rate = mgcUgcRepository.findById(rateId)
+      .orElseThrow(() -> new RateNotFoundException("Rate not found"));
+    rate.setStatus(RateStatus.REJECTED);
+    rate.setApprovedBy(approvedBy);
+    rate.setApprovedAt(OffsetDateTime.now());
+    return mgcUgcRepository.save(rate);
   }
 
   private Duration ttlFor(OffsetDateTime activeTo) {
