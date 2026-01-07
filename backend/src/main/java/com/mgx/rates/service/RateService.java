@@ -62,7 +62,14 @@ public class RateService {
     String key = mgcUgcKey(gameId);
     Optional<RateMgcUgc> cached = getCachedRate(key, RateMgcUgc.class);
     if (cached.isPresent()) {
-      return cached.get();
+      RateMgcUgc rate = cached.get();
+      if (rate.getId() != null) {
+        Optional<RateMgcUgc> persisted = mgcUgcRepository.findById(rate.getId());
+        if (persisted.isPresent()) {
+          return persisted.get();
+        }
+      }
+      redisTemplate.delete(key);
     }
 
     OffsetDateTime now = OffsetDateTime.now();
@@ -127,7 +134,7 @@ public class RateService {
     rate.setApprovedBy(createdBy);
     rate.setApprovedAt(now);
 
-    RateMgcUgc saved = mgcUgcRepository.save(rate);
+    RateMgcUgc saved = mgcUgcRepository.saveAndFlush(rate);
     redisTemplate.delete(mgcUgcKey(gameId));
     return saved;
   }

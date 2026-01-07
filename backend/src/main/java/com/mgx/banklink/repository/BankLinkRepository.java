@@ -7,4 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface BankLinkRepository extends JpaRepository<BankLink, UUID> {
   Optional<BankLink> findByUserId(UUID userId);
+
+  Optional<BankLink> findByPhoneNumberAndBankRef(String phoneNumber, String bankRef);
 }

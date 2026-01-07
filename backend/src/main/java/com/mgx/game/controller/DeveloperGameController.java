@@ -10,10 +10,14 @@ import com.mgx.game.dto.GameResponse;
 import com.mgx.game.model.Game;
 import com.mgx.game.model.GameStatus;
 import com.mgx.game.repository.GameRepository;
+import com.mgx.game.service.GameCountryService;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -25,14 +29,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class DeveloperGameController {
   private final GameRepository gameRepository;
   private final DeveloperRepository developerRepository;
+  private final GameCountryService gameCountryService;
 
-  public DeveloperGameController(GameRepository gameRepository, DeveloperRepository developerRepository) {
+  public DeveloperGameController(
+    GameRepository gameRepository,
+    DeveloperRepository developerRepository,
+    GameCountryService gameCountryService
+  ) {
     this.gameRepository = gameRepository;
     this.developerRepository = developerRepository;
+    this.gameCountryService = gameCountryService;
   }
 
   @PostMapping
   @PreAuthorize("hasRole('DEVELOPER')")
+  @Transactional
   public GameResponse createGame(
     @AuthenticationPrincipal JwtUserPrincipal principal,
     @RequestBody DeveloperGameRequest request
@@ -41,12 +52,13 @@ public class DeveloperGameController {
     if (request.getName() == null || request.getName().isBlank()) {
       throw new IllegalArgumentException("name is required");
     }
+    List<String> allowedCountries = gameCountryService.normalizeAndValidate(
+      request.getAllowedCountries()
+    );
 
-    Developer developer = developerRepository.findByUserId(principal.getUserId())
-      .orElseThrow(() -> new IllegalArgumentException("Developer not linked to user"));
-    if (developer.getStatus() != DeveloperStatus.ACTIVE) {
-      throw new IllegalArgumentException("Developer is not active");
-    }
+    Developer developer = developerRepository
+      .findTopByUserIdAndStatusOrderByCreatedAtDesc(principal.getUserId(), DeveloperStatus.ACTIVE)
+      .orElseThrow(() -> new IllegalArgumentException("Developer is not active"));
 
     Game game = new Game();
     game.setDeveloperId(developer.getId());
@@ -54,17 +66,23 @@ public class DeveloperGameController {
     game.setName(request.getName());
     game.setSettlementCurrency(request.getSettlementCurrency());
     game.setStatus(GameStatus.PENDING_APPROVAL);
-    return GameResponse.from(gameRepository.save(game));
+    Game saved = gameRepository.saveAndFlush(game);
+    gameCountryService.setAllowedCountries(saved.getId(), allowedCountries);
+    return GameResponse.from(saved, allowedCountries);
   }
 
   @GetMapping
   @PreAuthorize("hasRole('DEVELOPER')")
   public List<GameResponse> listGames(@AuthenticationPrincipal JwtUserPrincipal principal) {
-    Developer developer = developerRepository.findByUserId(principal.getUserId())
+    Developer developer = developerRepository
+      .findTopByUserIdOrderByCreatedAtDesc(principal.getUserId())
       .orElseThrow(() -> new IllegalArgumentException("Developer not linked to user"));
-    return gameRepository.findByDeveloperId(developer.getId())
-      .stream()
-      .map(GameResponse::from)
+    List<Game> games = gameRepository.findByDeveloperId(developer.getId());
+    Map<UUID, List<String>> allowedMap = gameCountryService.getAllowedCountriesForGames(
+      games.stream().map(Game::getId).collect(Collectors.toList())
+    );
+    return games.stream()
+      .map(game -> GameResponse.from(game, allowedMap.get(game.getId())))
       .collect(Collectors.toList());
   }
 }

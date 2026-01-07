@@ -1,8 +1,11 @@
 package com.mgx.game.dto;
 
+import java.util.List;
+
 public class DeveloperGameRequest {
   private String name;
   private String settlementCurrency;
+  private List<String> allowedCountries;
 
   public String getName() {
     return name;
@@ -18,5 +21,13 @@ public class DeveloperGameRequest {
 
   public void setSettlementCurrency(String settlementCurrency) {
     this.settlementCurrency = settlementCurrency;
+  }
+
+  public List<String> getAllowedCountries() {
+    return allowedCountries;
+  }
+
+  public void setAllowedCountries(List<String> allowedCountries) {
+    this.allowedCountries = allowedCountries;
   }
 }

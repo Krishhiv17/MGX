@@ -27,6 +27,9 @@ public class AdminApiKeyController {
       throw new IllegalArgumentException("ownerName is required");
     }
     List<String> scopes = request.getScopes() == null ? List.of("private") : request.getScopes();
+    if (scopes.isEmpty()) {
+      scopes = List.of("private");
+    }
     String rawKey = apiKeyService.generateRawKey();
     ApiKey apiKey = apiKeyService.createKey(request.getOwnerName(), scopes, rawKey);
     return ApiKeyResponse.from(apiKey, rawKey);

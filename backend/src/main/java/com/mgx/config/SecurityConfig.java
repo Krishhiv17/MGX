@@ -35,7 +35,7 @@ public class SecurityConfig {
           "/swagger-ui/**",
           "/v3/api-docs/**"
         ).permitAll()
-        .requestMatchers("/v1/private/**").hasAuthority("API_KEY")
+        .requestMatchers("/v1/private/**").hasAuthority("SCOPE_PRIVATE")
         .anyRequest().authenticated()
       )
       .addFilterBefore(apiKeyAuthFilter, UsernamePasswordAuthenticationFilter.class)

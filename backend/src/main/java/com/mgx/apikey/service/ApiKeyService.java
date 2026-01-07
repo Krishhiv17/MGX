@@ -22,7 +22,7 @@ public class ApiKeyService {
   public ApiKey createKey(String ownerName, List<String> scopes, String rawKey) {
     ApiKey apiKey = new ApiKey();
     apiKey.setOwnerName(ownerName);
-    apiKey.setScopes(String.join(",", scopes));
+    apiKey.setScopes(normalizeScopes(scopes));
     apiKey.setKeyHash(hash(rawKey));
     apiKey.setStatus(ApiKeyStatus.ACTIVE);
     return apiKeyRepository.save(apiKey);
@@ -34,6 +34,19 @@ public class ApiKeyService {
 
   public String generateRawKey() {
     return UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
+  }
+
+  public String normalizeScopes(List<String> scopes) {
+    if (scopes == null || scopes.isEmpty()) {
+      return "";
+    }
+    return scopes.stream()
+      .filter(scope -> scope != null && !scope.isBlank())
+      .map(String::trim)
+      .map(String::toLowerCase)
+      .distinct()
+      .reduce((a, b) -> a + "," + b)
+      .orElse("");
   }
 
   public String hash(String rawKey) {

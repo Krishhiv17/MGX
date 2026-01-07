@@ -39,6 +39,18 @@ DksImV4cCI6MTc2NjM5MDIwOX0.DWnl5SONEPpBxUAQ8hKML1b9c5JgPJz35XRYigZcjxY",
 
 ADMING LOGIN:
 
-curl -s -X POST http://localhost:8081/v1/auth/register \
+curl -s -X POST http://localhost:8081/v1/auth/login \
   -H "Content-Type: application/json" \
-  -d '{"email":"admin@mgx.local","password":"Admin123!","role":"ADMIN","phoneNumber":"+15550000001","countryCode":"US"}'
+  -d '{"email":"admin@mgx.local","password":"Admin123!"}'
+
+curl -s -X POST http://localhost:8081/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"admin.in@mgx.local","password":"Admin123!"}'
+
+  curl -s -X POST http://localhost:8081/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"dev.in@mgx.local","password":"Dev123!"}'
+
+  curl -s -X POST http://localhost:8081/v1/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"user.in@mgx.local","password":"User123!"}'

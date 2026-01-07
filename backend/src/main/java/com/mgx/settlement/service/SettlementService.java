@@ -45,8 +45,11 @@ public class SettlementService {
   }
 
   public UUID resolveDeveloperId(UUID userId) {
-    return developerRepository.findByUserId(userId)
-      .filter(dev -> dev.getStatus() == com.mgx.developer.model.DeveloperStatus.ACTIVE)
+    return developerRepository
+      .findTopByUserIdAndStatusOrderByCreatedAtDesc(
+        userId,
+        com.mgx.developer.model.DeveloperStatus.ACTIVE
+      )
       .map(Developer::getId)
       .orElseThrow(() -> new ReceivableNotFoundException("Developer not linked to user"));
   }

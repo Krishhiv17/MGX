@@ -10,11 +10,14 @@ import com.mgx.game.dto.UpdateGameStatusRequest;
 import com.mgx.game.model.Game;
 import com.mgx.game.model.GameStatus;
 import com.mgx.game.repository.GameRepository;
+import com.mgx.game.service.GameCountryService;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,14 +31,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class GameController {
   private final GameRepository gameRepository;
   private final DeveloperRepository developerRepository;
+  private final GameCountryService gameCountryService;
 
-  public GameController(GameRepository gameRepository, DeveloperRepository developerRepository) {
+  public GameController(
+    GameRepository gameRepository,
+    DeveloperRepository developerRepository,
+    GameCountryService gameCountryService
+  ) {
     this.gameRepository = gameRepository;
     this.developerRepository = developerRepository;
+    this.gameCountryService = gameCountryService;
   }
 
   @PostMapping
   @PreAuthorize("hasRole('ADMIN')")
+  @Transactional
   public GameResponse createGame(
     @AuthenticationPrincipal JwtUserPrincipal principal,
     @RequestBody CreateGameRequest request
@@ -46,6 +56,9 @@ public class GameController {
     Developer developer = developerRepository.findById(request.getDeveloperId())
       .orElseThrow(() -> new IllegalArgumentException("Developer not found"));
     ValidationUtil.requireCurrency(request.getSettlementCurrency());
+    List<String> allowedCountries = gameCountryService.normalizeAndValidate(
+      request.getAllowedCountries()
+    );
 
     Game game = new Game();
     game.setDeveloperId(request.getDeveloperId());
@@ -56,13 +69,21 @@ public class GameController {
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());
 
-    return GameResponse.from(gameRepository.save(game));
+    Game saved = gameRepository.saveAndFlush(game);
+    gameCountryService.setAllowedCountries(saved.getId(), allowedCountries);
+    return GameResponse.from(saved, allowedCountries);
   }
 
   @GetMapping
   @PreAuthorize("hasRole('ADMIN')")
   public List<GameResponse> listGames() {
-    return gameRepository.findAll().stream().map(GameResponse::from).collect(Collectors.toList());
+    List<Game> games = gameRepository.findAll();
+    Map<UUID, List<String>> allowedMap = gameCountryService.getAllowedCountriesForGames(
+      games.stream().map(Game::getId).collect(Collectors.toList())
+    );
+    return games.stream()
+      .map(game -> GameResponse.from(game, allowedMap.get(game.getId())))
+      .collect(Collectors.toList());
   }
 
   @GetMapping("/{gameId}")
@@ -70,7 +91,8 @@ public class GameController {
   public GameResponse getGame(@PathVariable UUID gameId) {
     Game game = gameRepository.findById(gameId)
       .orElseThrow(() -> new IllegalArgumentException("Game not found"));
-    return GameResponse.from(game);
+    List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
+    return GameResponse.from(game, allowedCountries);
   }
 
   @PutMapping("/{gameId}/status")
@@ -87,7 +109,9 @@ public class GameController {
     }
 
     game.setStatus(request.getStatus());
-    return GameResponse.from(gameRepository.save(game));
+    Game saved = gameRepository.save(game);
+    List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
+    return GameResponse.from(saved, allowedCountries);
   }
 
   @PostMapping("/{gameId}/approve")
@@ -101,7 +125,9 @@ public class GameController {
     game.setStatus(GameStatus.ACTIVE);
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());
-    return GameResponse.from(gameRepository.save(game));
+    Game saved = gameRepository.save(game);
+    List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
+    return GameResponse.from(saved, allowedCountries);
   }
 
   @PostMapping("/{gameId}/reject")
@@ -115,6 +141,8 @@ public class GameController {
     game.setStatus(GameStatus.REJECTED);
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());
-    return GameResponse.from(gameRepository.save(game));
+    Game saved = gameRepository.save(game);
+    List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
+    return GameResponse.from(saved, allowedCountries);
   }
 }

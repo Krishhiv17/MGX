@@ -3,6 +3,7 @@ package com.mgx.game.dto;
 import com.mgx.game.model.Game;
 import com.mgx.game.model.GameStatus;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.UUID;
 
 public class GameResponse {
@@ -15,8 +16,13 @@ public class GameResponse {
   private OffsetDateTime approvedAt;
   private String settlementCurrency;
   private OffsetDateTime createdAt;
+  private List<String> allowedCountries;
 
   public static GameResponse from(Game game) {
+    return from(game, null);
+  }
+
+  public static GameResponse from(Game game, List<String> allowedCountries) {
     GameResponse response = new GameResponse();
     response.setId(game.getId());
     response.setDeveloperId(game.getDeveloperId());
@@ -27,6 +33,7 @@ public class GameResponse {
     response.setApprovedAt(game.getApprovedAt());
     response.setSettlementCurrency(game.getSettlementCurrency());
     response.setCreatedAt(game.getCreatedAt());
+    response.setAllowedCountries(allowedCountries);
     return response;
   }
 
@@ -100,5 +107,13 @@ public class GameResponse {
 
   public void setCreatedAt(OffsetDateTime createdAt) {
     this.createdAt = createdAt;
+  }
+
+  public List<String> getAllowedCountries() {
+    return allowedCountries;
+  }
+
+  public void setAllowedCountries(List<String> allowedCountries) {
+    this.allowedCountries = allowedCountries;
   }
 }

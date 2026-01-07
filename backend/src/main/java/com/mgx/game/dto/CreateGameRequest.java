@@ -1,6 +1,7 @@
 package com.mgx.game.dto;
 
 import com.mgx.game.model.GameStatus;
+import java.util.List;
 import java.util.UUID;
 
 public class CreateGameRequest {
@@ -8,6 +9,7 @@ public class CreateGameRequest {
   private String name;
   private String settlementCurrency;
   private GameStatus status;
+  private List<String> allowedCountries;
 
   public UUID getDeveloperId() {
     return developerId;
@@ -39,5 +41,13 @@ public class CreateGameRequest {
 
   public void setStatus(GameStatus status) {
     this.status = status;
+  }
+
+  public List<String> getAllowedCountries() {
+    return allowedCountries;
+  }
+
+  public void setAllowedCountries(List<String> allowedCountries) {
+    this.allowedCountries = allowedCountries;
   }
 }

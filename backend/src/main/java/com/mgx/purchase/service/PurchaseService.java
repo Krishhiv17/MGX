@@ -11,6 +11,7 @@ import com.mgx.fx.service.FxService;
 import com.mgx.game.model.Game;
 import com.mgx.game.model.GameStatus;
 import com.mgx.game.repository.GameRepository;
+import com.mgx.game.service.GameCountryService;
 import com.mgx.ledger.model.AssetType;
 import com.mgx.ledger.model.LedgerDirection;
 import com.mgx.ledger.model.LedgerRefType;
@@ -49,6 +50,7 @@ public class PurchaseService {
   private final ReceivableRepository receivableRepository;
   private final UserRepository userRepository;
   private final IdempotencyService idempotencyService;
+  private final GameCountryService gameCountryService;
 
   public PurchaseService(
     PurchaseRepository purchaseRepository,
@@ -59,7 +61,8 @@ public class PurchaseService {
     FxService fxService,
     ReceivableRepository receivableRepository,
     UserRepository userRepository,
-    IdempotencyService idempotencyService
+    IdempotencyService idempotencyService,
+    GameCountryService gameCountryService
   ) {
     this.purchaseRepository = purchaseRepository;
     this.rateService = rateService;
@@ -70,6 +73,7 @@ public class PurchaseService {
     this.receivableRepository = receivableRepository;
     this.userRepository = userRepository;
     this.idempotencyService = idempotencyService;
+    this.gameCountryService = gameCountryService;
   }
 
   @Transactional
@@ -105,6 +109,12 @@ public class PurchaseService {
     if (game.getStatus() != GameStatus.ACTIVE) {
       throw new IllegalArgumentException("Game is not active");
     }
+    String countryCode = userRepository.findById(userId)
+      .map(user -> user.getCountryCode())
+      .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    if (!gameCountryService.isAllowed(gameId, countryCode)) {
+      throw new IllegalArgumentException("Game not available in your country");
+    }
 
     RateMgcUgc rate = rateService.getActiveMgcToUgcRate(gameId);
     BigDecimal ugcPerMgc = rate.getUgcPerMgc();
@@ -122,9 +132,6 @@ public class PurchaseService {
       mgcSpent = ugcCredited.divide(ugcPerMgc, SCALE, RoundingMode.HALF_UP);
     }
 
-    String countryCode = userRepository.findById(userId)
-      .map(user -> user.getCountryCode())
-      .orElseThrow(() -> new IllegalArgumentException("User not found"));
     Wallet mgcWallet = walletService.getWalletByUserAndType(
       userId,
       WalletType.MGC,

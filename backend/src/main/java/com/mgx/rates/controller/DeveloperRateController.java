@@ -44,11 +44,9 @@ public class DeveloperRateController {
     if (request.getGameId() == null) {
       throw new IllegalArgumentException("gameId is required");
     }
-    Developer developer = developerRepository.findByUserId(principal.getUserId())
-      .orElseThrow(() -> new IllegalArgumentException("Developer not linked to user"));
-    if (developer.getStatus() != DeveloperStatus.ACTIVE) {
-      throw new IllegalArgumentException("Developer is not active");
-    }
+    Developer developer = developerRepository
+      .findTopByUserIdAndStatusOrderByCreatedAtDesc(principal.getUserId(), DeveloperStatus.ACTIVE)
+      .orElseThrow(() -> new IllegalArgumentException("Developer is not active"));
     Game game = gameRepository.findById(request.getGameId())
       .orElseThrow(() -> new IllegalArgumentException("Game not found"));
     if (!game.getDeveloperId().equals(developer.getId())) {
