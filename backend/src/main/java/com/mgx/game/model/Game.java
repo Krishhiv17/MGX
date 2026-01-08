@@ -39,6 +39,9 @@ public class Game {
   @Column(name = "approved_at")
   private OffsetDateTime approvedAt;
 
+  @Column(name = "rejection_reason")
+  private String rejectionReason;
+
   @Column(name = "settlement_currency", nullable = false)
   private String settlementCurrency;
 
@@ -100,6 +103,14 @@ public class Game {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public String getSettlementCurrency() {

@@ -1,6 +1,7 @@
 package com.mgx.game.controller;
 
 import com.mgx.auth.security.JwtUserPrincipal;
+import com.mgx.common.dto.RejectRequest;
 import com.mgx.common.util.ValidationUtil;
 import com.mgx.developer.model.Developer;
 import com.mgx.developer.repository.DeveloperRepository;
@@ -125,6 +126,7 @@ public class GameController {
     game.setStatus(GameStatus.ACTIVE);
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());
+    game.setRejectionReason(null);
     Game saved = gameRepository.save(game);
     List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
     return GameResponse.from(saved, allowedCountries);
@@ -134,13 +136,16 @@ public class GameController {
   @PreAuthorize("hasRole('ADMIN')")
   public GameResponse rejectGame(
     @AuthenticationPrincipal JwtUserPrincipal principal,
-    @PathVariable UUID gameId
+    @PathVariable UUID gameId,
+    @RequestBody RejectRequest request
   ) {
+    ValidationUtil.requireNonBlank(request.getReason(), "reason");
     Game game = gameRepository.findById(gameId)
       .orElseThrow(() -> new IllegalArgumentException("Game not found"));
     game.setStatus(GameStatus.REJECTED);
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());
+    game.setRejectionReason(request.getReason());
     Game saved = gameRepository.save(game);
     List<String> allowedCountries = gameCountryService.getAllowedCountries(gameId);
     return GameResponse.from(saved, allowedCountries);

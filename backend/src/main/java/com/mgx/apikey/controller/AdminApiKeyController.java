@@ -6,6 +6,7 @@ import com.mgx.apikey.model.ApiKey;
 import com.mgx.apikey.service.ApiKeyService;
 import java.util.List;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -33,5 +34,13 @@ public class AdminApiKeyController {
     String rawKey = apiKeyService.generateRawKey();
     ApiKey apiKey = apiKeyService.createKey(request.getOwnerName(), scopes, rawKey);
     return ApiKeyResponse.from(apiKey, rawKey);
+  }
+
+  @GetMapping
+  @PreAuthorize("hasRole('ADMIN')")
+  public List<ApiKeyResponse> list() {
+    return apiKeyService.listKeys().stream()
+      .map(key -> ApiKeyResponse.from(key, null))
+      .toList();
   }
 }

@@ -14,6 +14,7 @@ public class GameResponse {
   private GameStatus status;
   private UUID approvedBy;
   private OffsetDateTime approvedAt;
+  private String rejectionReason;
   private String settlementCurrency;
   private OffsetDateTime createdAt;
   private List<String> allowedCountries;
@@ -31,6 +32,7 @@ public class GameResponse {
     response.setStatus(game.getStatus());
     response.setApprovedBy(game.getApprovedBy());
     response.setApprovedAt(game.getApprovedAt());
+    response.setRejectionReason(game.getRejectionReason());
     response.setSettlementCurrency(game.getSettlementCurrency());
     response.setCreatedAt(game.getCreatedAt());
     response.setAllowedCountries(allowedCountries);
@@ -91,6 +93,14 @@ public class GameResponse {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public String getSettlementCurrency() {

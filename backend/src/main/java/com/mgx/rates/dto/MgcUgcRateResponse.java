@@ -16,6 +16,7 @@ public class MgcUgcRateResponse {
   private RateStatus status;
   private UUID approvedBy;
   private OffsetDateTime approvedAt;
+  private String rejectionReason;
   private OffsetDateTime createdAt;
 
   public static MgcUgcRateResponse from(RateMgcUgc rate) {
@@ -29,6 +30,7 @@ public class MgcUgcRateResponse {
     response.setStatus(rate.getStatus());
     response.setApprovedBy(rate.getApprovedBy());
     response.setApprovedAt(rate.getApprovedAt());
+    response.setRejectionReason(rate.getRejectionReason());
     response.setCreatedAt(rate.getCreatedAt());
     return response;
   }
@@ -103,6 +105,14 @@ public class MgcUgcRateResponse {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public OffsetDateTime getCreatedAt() {

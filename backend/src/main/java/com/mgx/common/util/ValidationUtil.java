@@ -19,4 +19,10 @@ public final class ValidationUtil {
       throw new IllegalArgumentException("Unsupported currency");
     }
   }
+
+  public static void requireNonBlank(String value, String fieldName) {
+    if (value == null || value.isBlank()) {
+      throw new IllegalArgumentException(fieldName + " is required");
+    }
+  }
 }

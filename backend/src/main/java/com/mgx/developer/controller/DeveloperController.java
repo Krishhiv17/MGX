@@ -1,6 +1,7 @@
 package com.mgx.developer.controller;
 
 import com.mgx.auth.security.JwtUserPrincipal;
+import com.mgx.common.dto.RejectRequest;
 import com.mgx.common.util.ValidationUtil;
 import com.mgx.developer.dto.CreateDeveloperRequest;
 import com.mgx.developer.dto.DeveloperResponse;
@@ -78,6 +79,7 @@ public class DeveloperController {
     developer.setStatus(DeveloperStatus.ACTIVE);
     developer.setApprovedBy(principal.getUserId());
     developer.setApprovedAt(java.time.OffsetDateTime.now());
+    developer.setRejectionReason(null);
     return DeveloperResponse.from(developerRepository.save(developer));
   }
 
@@ -85,13 +87,16 @@ public class DeveloperController {
   @PreAuthorize("hasRole('ADMIN')")
   public DeveloperResponse rejectDeveloper(
     @AuthenticationPrincipal JwtUserPrincipal principal,
-    @PathVariable UUID developerId
+    @PathVariable UUID developerId,
+    @RequestBody RejectRequest request
   ) {
+    ValidationUtil.requireNonBlank(request.getReason(), "reason");
     Developer developer = developerRepository.findById(developerId)
       .orElseThrow(() -> new IllegalArgumentException("Developer not found"));
     developer.setStatus(DeveloperStatus.REJECTED);
     developer.setApprovedBy(principal.getUserId());
     developer.setApprovedAt(java.time.OffsetDateTime.now());
+    developer.setRejectionReason(request.getReason());
     return DeveloperResponse.from(developerRepository.save(developer));
   }
 

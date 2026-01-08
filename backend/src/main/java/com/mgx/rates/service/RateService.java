@@ -12,6 +12,7 @@ import com.mgx.rates.repository.RatePointsMgcRepository;
 import java.math.BigDecimal;
 import java.time.Duration;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -133,6 +134,7 @@ public class RateService {
     rate.setStatus(RateStatus.APPROVED);
     rate.setApprovedBy(createdBy);
     rate.setApprovedAt(now);
+    rate.setRejectionReason(null);
 
     RateMgcUgc saved = mgcUgcRepository.saveAndFlush(rate);
     redisTemplate.delete(mgcUgcKey(gameId));
@@ -176,6 +178,7 @@ public class RateService {
     rate.setApprovedAt(now);
     rate.setActiveFrom(rate.getActiveFrom() == null ? now : rate.getActiveFrom());
     rate.setActiveTo(null);
+    rate.setRejectionReason(null);
 
     RateMgcUgc saved = mgcUgcRepository.save(rate);
     redisTemplate.delete(mgcUgcKey(rate.getGameId()));
@@ -183,13 +186,22 @@ public class RateService {
   }
 
   @Transactional
-  public RateMgcUgc rejectMgcUgcRate(UUID rateId, UUID approvedBy) {
+  public RateMgcUgc rejectMgcUgcRate(UUID rateId, UUID approvedBy, String reason) {
     RateMgcUgc rate = mgcUgcRepository.findById(rateId)
       .orElseThrow(() -> new RateNotFoundException("Rate not found"));
     rate.setStatus(RateStatus.REJECTED);
     rate.setApprovedBy(approvedBy);
     rate.setApprovedAt(OffsetDateTime.now());
+    rate.setRejectionReason(reason);
     return mgcUgcRepository.save(rate);
+  }
+
+  public List<RateMgcUgc> listMgcUgcRates(RateStatus status) {
+    List<RateMgcUgc> rates = mgcUgcRepository.findAll();
+    if (status == null) {
+      return rates;
+    }
+    return rates.stream().filter(rate -> rate.getStatus() == status).toList();
   }
 
   private Duration ttlFor(OffsetDateTime activeTo) {

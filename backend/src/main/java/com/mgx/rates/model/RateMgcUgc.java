@@ -46,6 +46,9 @@ public class RateMgcUgc {
   @Column(name = "approved_at")
   private OffsetDateTime approvedAt;
 
+  @Column(name = "rejection_reason")
+  private String rejectionReason;
+
   @CreationTimestamp
   @Column(name = "created_at", nullable = false, updatable = false)
   private OffsetDateTime createdAt;
@@ -120,6 +123,14 @@ public class RateMgcUgc {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public OffsetDateTime getCreatedAt() {

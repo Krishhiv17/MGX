@@ -15,6 +15,7 @@ public class DeveloperSummaryResponse {
   private UUID userId;
   private UUID approvedBy;
   private OffsetDateTime approvedAt;
+  private String rejectionReason;
   private OffsetDateTime createdAt;
   private BigDecimal unsettledTotal;
 
@@ -28,6 +29,7 @@ public class DeveloperSummaryResponse {
     response.setUserId(developer.getUserId());
     response.setApprovedBy(developer.getApprovedBy());
     response.setApprovedAt(developer.getApprovedAt());
+    response.setRejectionReason(developer.getRejectionReason());
     response.setCreatedAt(developer.getCreatedAt());
     response.setUnsettledTotal(unsettledTotal);
     return response;
@@ -95,6 +97,14 @@ public class DeveloperSummaryResponse {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public OffsetDateTime getCreatedAt() {

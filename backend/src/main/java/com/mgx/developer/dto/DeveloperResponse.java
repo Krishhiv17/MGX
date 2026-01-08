@@ -14,6 +14,7 @@ public class DeveloperResponse {
   private DeveloperStatus status;
   private UUID approvedBy;
   private OffsetDateTime approvedAt;
+  private String rejectionReason;
   private OffsetDateTime createdAt;
 
   public static DeveloperResponse from(Developer developer) {
@@ -26,6 +27,7 @@ public class DeveloperResponse {
     response.setStatus(developer.getStatus());
     response.setApprovedBy(developer.getApprovedBy());
     response.setApprovedAt(developer.getApprovedAt());
+    response.setRejectionReason(developer.getRejectionReason());
     response.setCreatedAt(developer.getCreatedAt());
     return response;
   }
@@ -92,6 +94,14 @@ public class DeveloperResponse {
 
   public void setApprovedAt(OffsetDateTime approvedAt) {
     this.approvedAt = approvedAt;
+  }
+
+  public String getRejectionReason() {
+    return rejectionReason;
+  }
+
+  public void setRejectionReason(String rejectionReason) {
+    this.rejectionReason = rejectionReason;
   }
 
   public OffsetDateTime getCreatedAt() {

@@ -32,6 +32,10 @@ public class ApiKeyService {
     return apiKeyRepository.findByKeyHashAndStatus(hash(rawKey), ApiKeyStatus.ACTIVE);
   }
 
+  public List<ApiKey> listKeys() {
+    return apiKeyRepository.findAll();
+  }
+
   public String generateRawKey() {
     return UUID.randomUUID().toString().replace("-", "") + UUID.randomUUID().toString().replace("-", "");
   }
