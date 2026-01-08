@@ -15,7 +15,7 @@ public class CorsConfig {
     CorsConfiguration cfg = new CorsConfiguration();
     cfg.setAllowedOrigins(List.of("http://localhost:3000"));
     cfg.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Idempotency-Key"));
+    cfg.setAllowedHeaders(List.of("Authorization", "Content-Type", "Idempotency-Key", "X-API-Key"));
     cfg.setAllowCredentials(false);
     cfg.setMaxAge(3600L);
 
