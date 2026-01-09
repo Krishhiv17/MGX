@@ -1,0 +1,237 @@
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 48px 32px 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 32px;
+}
+
+.hero {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.8fr);
+  gap: 28px;
+  align-items: center;
+}
+
+.heroCard {
+  background: var(--panel);
+  border-radius: 28px;
+  padding: 32px;
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+}
+
+.heroCard h1 {
+  font-family: "Fraunces", "Georgia", serif;
+  font-size: clamp(2.2rem, 3vw, 3.2rem);
+  margin: 0 0 16px;
+}
+
+.heroCard p {
+  margin: 0 0 24px;
+  color: var(--muted);
+}
+
+.chipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.chip {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.actionRow {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.primaryButton,
+.secondaryButton,
+.dangerButton {
+  padding: 12px 20px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.primaryButton {
+  background: linear-gradient(135deg, var(--accent), var(--accent-strong));
+  color: #0b1119;
+  box-shadow: 0 10px 30px rgba(64, 207, 255, 0.3);
+}
+
+.secondaryButton {
+  border-color: rgba(255, 255, 255, 0.18);
+  background: transparent;
+  color: var(--text);
+}
+
+.dangerButton {
+  background: rgba(255, 125, 114, 0.15);
+  border-color: rgba(255, 125, 114, 0.4);
+  color: var(--danger);
+}
+
+.primaryButton:hover,
+.secondaryButton:hover,
+.dangerButton:hover {
+  transform: translateY(-1px);
+}
+
+.nav {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.navButton,
+.navActive {
+  padding: 10px 18px;
+  border-radius: 999px;
+  border: 1px solid var(--stroke);
+  background: transparent;
+  color: var(--muted);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.navActive {
+  color: var(--accent);
+  border-color: rgba(64, 207, 255, 0.4);
+  background: rgba(64, 207, 255, 0.12);
+}
+
+.section {
+  background: var(--panel);
+  border-radius: 26px;
+  padding: 28px;
+  border: 1px solid var(--stroke);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.sectionHeader {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.sectionHeader h2 {
+  margin: 0;
+}
+
+.sectionHeader p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.card {
+  padding: 18px;
+  border-radius: 18px;
+  border: 1px solid var(--stroke);
+  background: var(--panel-strong);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cardTitle {
+  font-weight: 600;
+}
+
+.muted {
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.formGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 16px;
+}
+
+.formGrid label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.formGrid input,
+.formGrid select,
+.formGrid textarea {
+  background: rgba(8, 12, 20, 0.7);
+  border: 1px solid var(--stroke);
+  border-radius: 12px;
+  padding: 12px 14px;
+  color: var(--text);
+}
+
+.table {
+  display: grid;
+  gap: 12px;
+}
+
+.tableRow {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: 16px;
+  border: 1px solid var(--stroke);
+  background: rgba(10, 14, 22, 0.7);
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tag {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  font-size: 11px;
+  border: 1px solid rgba(64, 207, 255, 0.4);
+  color: var(--accent);
+}
+
+.error {
+  color: var(--danger);
+  margin: 0;
+  font-size: 13px;
+}
+
+.success {
+  color: var(--success);
+  margin: 0;
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .tableRow {
+    grid-template-columns: 1fr;
+  }
+}

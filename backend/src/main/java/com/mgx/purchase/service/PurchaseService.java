@@ -8,6 +8,8 @@ import com.mgx.common.util.ValidationUtil;
 import com.mgx.fx.model.FxRate;
 import com.mgx.fx.model.FxRateWindow;
 import com.mgx.fx.service.FxService;
+import com.mgx.developer.model.Developer;
+import com.mgx.developer.repository.DeveloperRepository;
 import com.mgx.game.model.Game;
 import com.mgx.game.model.GameStatus;
 import com.mgx.game.repository.GameRepository;
@@ -51,6 +53,7 @@ public class PurchaseService {
   private final UserRepository userRepository;
   private final IdempotencyService idempotencyService;
   private final GameCountryService gameCountryService;
+  private final DeveloperRepository developerRepository;
 
   public PurchaseService(
     PurchaseRepository purchaseRepository,
@@ -62,7 +65,8 @@ public class PurchaseService {
     ReceivableRepository receivableRepository,
     UserRepository userRepository,
     IdempotencyService idempotencyService,
-    GameCountryService gameCountryService
+    GameCountryService gameCountryService,
+    DeveloperRepository developerRepository
   ) {
     this.purchaseRepository = purchaseRepository;
     this.rateService = rateService;
@@ -74,6 +78,7 @@ public class PurchaseService {
     this.userRepository = userRepository;
     this.idempotencyService = idempotencyService;
     this.gameCountryService = gameCountryService;
+    this.developerRepository = developerRepository;
   }
 
   @Transactional
@@ -185,7 +190,9 @@ public class PurchaseService {
   }
 
   private void createReceivable(Game game, Purchase purchase, BigDecimal mgcSpent) {
-    String settlementCurrency = game.getSettlementCurrency();
+    Developer developer = developerRepository.findById(game.getDeveloperId())
+      .orElseThrow(() -> new GameNotFoundException("Developer not found for game"));
+    String settlementCurrency = developer.getSettlementCurrency();
     ValidationUtil.requireCurrency(settlementCurrency);
 
     FxRateWindow window = fxService.getCurrentFxWindow();

@@ -308,6 +308,12 @@
   font-size: 12px;
 }
 
+.error {
+  color: var(--danger);
+  font-size: 13px;
+  margin: 0;
+}
+
 .logSection {
   background: var(--panel-strong);
   border-radius: 24px;

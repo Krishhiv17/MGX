@@ -61,6 +61,12 @@ public class SettlementService {
     if (developer.getStatus() != com.mgx.developer.model.DeveloperStatus.ACTIVE) {
       throw new ReceivableNotFoundException("Developer is not active");
     }
+    if (receivableRepository.findByDeveloperIdAndStatusOrderByCreatedAtAsc(
+      developerId,
+      ReceivableStatus.UNSETTLED
+    ).isEmpty()) {
+      throw new ReceivableNotFoundException("No unsettled receivables to settle");
+    }
 
     SettlementBatch batch = new SettlementBatch();
     batch.setDeveloperId(developerId);
