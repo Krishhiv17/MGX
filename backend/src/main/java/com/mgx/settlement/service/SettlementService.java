@@ -11,6 +11,7 @@ import com.mgx.settlement.model.SettlementBatch;
 import com.mgx.settlement.model.SettlementBatchStatus;
 import com.mgx.settlement.repository.ReceivableRepository;
 import com.mgx.settlement.repository.SettlementBatchRepository;
+import com.mgx.config.RabbitMQConfig;
 import java.math.BigDecimal;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -61,6 +62,12 @@ public class SettlementService {
     if (developer.getStatus() != com.mgx.developer.model.DeveloperStatus.ACTIVE) {
       throw new ReceivableNotFoundException("Developer is not active");
     }
+    if (batchRepository.existsByDeveloperIdAndStatusIn(
+      developerId,
+      List.of(SettlementBatchStatus.REQUESTED, SettlementBatchStatus.PROCESSING)
+    )) {
+      throw new ReceivableNotFoundException("Settlement already requested");
+    }
     if (receivableRepository.findByDeveloperIdAndStatusOrderByCreatedAtAsc(
       developerId,
       ReceivableStatus.UNSETTLED
@@ -86,8 +93,35 @@ public class SettlementService {
 
     saved.setTotalAmount(reservation.getTotalAmount());
     batchRepository.save(saved);
+    return saved;
+  }
 
-    rabbitTemplate.convertAndSend("settlement.batch.requested", saved.getId().toString());
+  @Transactional
+  public SettlementBatch approveSettlement(UUID batchId) {
+    SettlementBatch batch = batchRepository.findById(batchId)
+      .orElseThrow(() -> new ReceivableNotFoundException("Settlement batch not found"));
+    if (batch.getStatus() != SettlementBatchStatus.REQUESTED) {
+      throw new ReceivableNotFoundException("Settlement is not pending approval");
+    }
+    batch.setStatus(SettlementBatchStatus.PROCESSING);
+    batch.setFailureReason(null);
+    SettlementBatch saved = batchRepository.save(batch);
+    rabbitTemplate.convertAndSend(RabbitMQConfig.SETTLEMENT_QUEUE, saved.getId().toString());
+    return saved;
+  }
+
+  @Transactional
+  public SettlementBatch rejectSettlement(UUID batchId, String reason) {
+    SettlementBatch batch = batchRepository.findById(batchId)
+      .orElseThrow(() -> new ReceivableNotFoundException("Settlement batch not found"));
+    if (batch.getStatus() != SettlementBatchStatus.REQUESTED) {
+      throw new ReceivableNotFoundException("Settlement is not pending approval");
+    }
+    batch.setStatus(SettlementBatchStatus.REJECTED);
+    batch.setFailureReason(reason == null || reason.isBlank() ? "Rejected by admin" : reason);
+    batch.setProcessedAt(OffsetDateTime.now());
+    SettlementBatch saved = batchRepository.save(batch);
+    reservationService.releaseReservations(batchId);
     return saved;
   }
 
@@ -95,6 +129,9 @@ public class SettlementService {
   public void processSettlementBatch(UUID batchId) {
     SettlementBatch batch = batchRepository.findById(batchId)
       .orElseThrow(() -> new ReceivableNotFoundException("Settlement batch not found"));
+    if (batch.getStatus() == SettlementBatchStatus.REJECTED || batch.getStatus() == SettlementBatchStatus.PAID) {
+      throw new ReceivableNotFoundException("Settlement is not eligible for processing");
+    }
 
     List<Receivable> receivables = receivableRepository.findBySettlementBatchId(batchId);
     if (receivables.isEmpty()) {

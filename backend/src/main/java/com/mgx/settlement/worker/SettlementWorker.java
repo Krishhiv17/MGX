@@ -1,5 +1,6 @@
 package com.mgx.settlement.worker;
 
+import com.mgx.config.RabbitMQConfig;
 import com.mgx.settlement.service.SettlementService;
 import java.util.UUID;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -13,7 +14,7 @@ public class SettlementWorker {
     this.settlementService = settlementService;
   }
 
-  @RabbitListener(queues = "settlement.batch.requested")
+  @RabbitListener(queues = RabbitMQConfig.SETTLEMENT_QUEUE)
   public void handle(String batchId) {
     settlementService.processSettlementBatch(UUID.fromString(batchId));
   }

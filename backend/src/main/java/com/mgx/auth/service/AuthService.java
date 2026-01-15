@@ -75,6 +75,43 @@ public class AuthService {
     return new AuthResponse(token, saved.getId(), saved.getEmail(), saved.getRole());
   }
 
+  public AuthResponse registerAdmin(String email, String password) {
+    Optional<User> existing = userRepository.findByEmail(email);
+    if (existing.isPresent()) {
+      throw new IllegalArgumentException("Email already registered");
+    }
+    if (password == null || password.isBlank()) {
+      throw new IllegalArgumentException("Password is required");
+    }
+
+    User user = new User();
+    user.setEmail(email);
+    user.setPasswordHash(passwordEncoder.encode(password));
+    user.setRole(UserRole.ADMIN);
+    user.setCountryCode("US");
+
+    User saved = userRepository.save(user);
+    String token = tokenProvider.generateToken(saved);
+    return new AuthResponse(token, saved.getId(), saved.getEmail(), saved.getRole());
+  }
+
+  public void changePassword(
+    java.util.UUID userId,
+    String currentPassword,
+    String newPassword
+  ) {
+    if (newPassword == null || newPassword.isBlank()) {
+      throw new IllegalArgumentException("New password is required");
+    }
+    User user = userRepository.findById(userId)
+      .orElseThrow(() -> new IllegalArgumentException("User not found"));
+    if (!passwordEncoder.matches(currentPassword, user.getPasswordHash())) {
+      throw new IllegalArgumentException("Current password is incorrect");
+    }
+    user.setPasswordHash(passwordEncoder.encode(newPassword));
+    userRepository.save(user);
+  }
+
   public AuthResponse login(String email, String password) {
     User user = userRepository.findByEmail(email)
       .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));

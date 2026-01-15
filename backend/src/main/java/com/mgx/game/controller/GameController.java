@@ -56,7 +56,12 @@ public class GameController {
     }
     Developer developer = developerRepository.findById(request.getDeveloperId())
       .orElseThrow(() -> new IllegalArgumentException("Developer not found"));
-    ValidationUtil.requireCurrency(request.getSettlementCurrency());
+    String settlementCurrency = developer.getSettlementCurrency();
+    ValidationUtil.requireCurrency(settlementCurrency);
+    if (request.getSettlementCurrency() != null &&
+      !settlementCurrency.equalsIgnoreCase(request.getSettlementCurrency())) {
+      throw new IllegalArgumentException("Settlement currency must match developer currency");
+    }
     List<String> allowedCountries = gameCountryService.normalizeAndValidate(
       request.getAllowedCountries()
     );
@@ -65,7 +70,7 @@ public class GameController {
     game.setDeveloperId(request.getDeveloperId());
     game.setDeveloperName(developer.getName());
     game.setName(request.getName());
-    game.setSettlementCurrency(request.getSettlementCurrency());
+    game.setSettlementCurrency(settlementCurrency);
     game.setStatus(GameStatus.ACTIVE);
     game.setApprovedBy(principal.getUserId());
     game.setApprovedAt(java.time.OffsetDateTime.now());

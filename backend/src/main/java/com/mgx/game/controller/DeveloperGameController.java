@@ -48,7 +48,6 @@ public class DeveloperGameController {
     @AuthenticationPrincipal JwtUserPrincipal principal,
     @RequestBody DeveloperGameRequest request
   ) {
-    ValidationUtil.requireCurrency(request.getSettlementCurrency());
     if (request.getName() == null || request.getName().isBlank()) {
       throw new IllegalArgumentException("name is required");
     }
@@ -59,12 +58,18 @@ public class DeveloperGameController {
     Developer developer = developerRepository
       .findTopByUserIdAndStatusOrderByCreatedAtDesc(principal.getUserId(), DeveloperStatus.ACTIVE)
       .orElseThrow(() -> new IllegalArgumentException("Developer is not active"));
+    String settlementCurrency = developer.getSettlementCurrency();
+    ValidationUtil.requireCurrency(settlementCurrency);
+    if (request.getSettlementCurrency() != null &&
+      !settlementCurrency.equalsIgnoreCase(request.getSettlementCurrency())) {
+      throw new IllegalArgumentException("Settlement currency must match developer currency");
+    }
 
     Game game = new Game();
     game.setDeveloperId(developer.getId());
     game.setDeveloperName(developer.getName());
     game.setName(request.getName());
-    game.setSettlementCurrency(request.getSettlementCurrency());
+    game.setSettlementCurrency(settlementCurrency);
     game.setStatus(GameStatus.PENDING_APPROVAL);
     Game saved = gameRepository.saveAndFlush(game);
     gameCountryService.setAllowedCountries(saved.getId(), allowedCountries);

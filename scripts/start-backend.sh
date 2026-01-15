@@ -14,6 +14,8 @@ cleanup() {
 
 trap cleanup EXIT INT TERM
 
+rm -rf "${root_dir}/backend/target"
+
 "${root_dir}/backend/mvnw" -f "${root_dir}/backend/pom.xml" spring-boot:run &
 pids+=("$!")
 

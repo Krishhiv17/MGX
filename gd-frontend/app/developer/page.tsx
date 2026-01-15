@@ -35,10 +35,14 @@ type Receivable = {
 };
 
 type Settlement = {
-  id: string;
-  developerId: string;
+  id?: string | null;
+  developerId?: string | null;
   status: string;
+  totalAmount?: number | null;
+  currency?: string | null;
   requestedAt?: string | null;
+  processedAt?: string | null;
+  failureReason?: string | null;
 };
 
 type DeveloperProfile = {
@@ -431,14 +435,22 @@ export default function DeveloperPortal() {
           ))}
         </div>
         <div className={styles.table}>
-          {settlements.map((batch) => (
-            <div key={batch.id} className={styles.tableRow}>
-              <div>{batch.id}</div>
-              <div>{batch.status}</div>
-              <div>{batch.developerId}</div>
-              <div>{batch.requestedAt || "—"}</div>
-            </div>
-          ))}
+          {settlements.map((batch, index) => {
+            const rowKey = batch.id || `${batch.requestedAt || "settlement"}-${index}`;
+            return (
+              <div key={rowKey} className={styles.tableRow}>
+                <div>
+                  <strong>{batch.status}</strong>
+                  <p className={styles.muted}>{batch.requestedAt || "—"}</p>
+                </div>
+                <div>
+                  {batch.totalAmount ?? "—"} {batch.currency || ""}
+                </div>
+                <div className={styles.muted}>{batch.processedAt || "—"}</div>
+                <div className={styles.muted}>{batch.failureReason || "—"}</div>
+              </div>
+            );
+          })}
         </div>
       </section>
 

@@ -34,6 +34,19 @@ public class ReceivableReservationService {
     return new ReservationResult(receivables, total);
   }
 
+  @Transactional
+  public void releaseReservations(UUID batchId) {
+    List<Receivable> receivables = receivableRepository.findBySettlementBatchId(batchId);
+    for (Receivable receivable : receivables) {
+      if (receivable.getStatus() == ReceivableStatus.RESERVED) {
+        receivable.setStatus(ReceivableStatus.UNSETTLED);
+      }
+      receivable.setReservedAt(null);
+      receivable.setSettlementBatchId(null);
+    }
+    receivableRepository.saveAll(receivables);
+  }
+
   public static class ReservationResult {
     private final List<Receivable> receivables;
     private final BigDecimal totalAmount;

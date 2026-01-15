@@ -84,6 +84,19 @@ type Receivable = {
   createdAt?: string | null;
 };
 
+type SettlementBatch = {
+  id?: string | null;
+  batchId?: string | null;
+  status: string;
+  totalAmount: number;
+  currency: string;
+  requestedAt?: string | null;
+  processedAt?: string | null;
+  failureReason?: string | null;
+  developerId?: string | null;
+  requestedBy?: string | null;
+};
+
 type LogEntry = {
   time: string;
   title: string;
@@ -107,11 +120,19 @@ export default function AdminPortalPage() {
   const [apiKeys, setApiKeys] = useState<ApiKey[]>([]);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [receivables, setReceivables] = useState<Receivable[]>([]);
+  const [settlements, setSettlements] = useState<SettlementBatch[]>([]);
 
   const [rejectReason, setRejectReason] = useState<Record<string, string>>({});
   const [apiKeyOwner, setApiKeyOwner] = useState("Bank Mock");
   const [apiKeyScopes, setApiKeyScopes] = useState("private");
   const [newApiKey, setNewApiKey] = useState<ApiKey | null>(null);
+  const [newAdminEmail, setNewAdminEmail] = useState("");
+  const [newAdminPassword, setNewAdminPassword] = useState("");
+  const [newAdminToken, setNewAdminToken] = useState("");
+  const [passwordCurrent, setPasswordCurrent] = useState("");
+  const [passwordNext, setPasswordNext] = useState("");
+  const [passwordConfirm, setPasswordConfirm] = useState("");
+  const [securityMessage, setSecurityMessage] = useState("");
 
   useEffect(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
@@ -208,6 +229,15 @@ export default function AdminPortalPage() {
     }
   };
 
+  const loadDevelopers = async () => {
+    try {
+      const payload = await apiFetch("/v1/admin/developers");
+      setDevelopers(payload as Developer[]);
+    } catch (error) {
+      log("Load developers error", { error: String(error) });
+    }
+  };
+
   const loadSummaries = async () => {
     try {
       const payload = await apiFetch("/v1/admin/developers/summary");
@@ -235,6 +265,19 @@ export default function AdminPortalPage() {
       log("Loaded receivables", payload);
     } catch (error) {
       log("Load receivables error", { error: String(error) });
+    }
+  };
+
+  const loadSettlements = async () => {
+    try {
+      const payload = await apiFetch("/v1/admin/settlements");
+      setSettlements(payload as SettlementBatch[]);
+      log("Loaded settlements", payload);
+      if (!developers.length) {
+        loadDevelopers();
+      }
+    } catch (error) {
+      log("Load settlements error", { error: String(error) });
     }
   };
 
@@ -308,6 +351,26 @@ export default function AdminPortalPage() {
     loadApprovals();
   };
 
+  const approveSettlement = async (batchId: string) => {
+    await apiFetch(`/v1/admin/settlements/${batchId}/approve`, { method: "POST" });
+    log("Settlement approved", { batchId });
+    loadSettlements();
+  };
+
+  const rejectSettlement = async (batchId: string) => {
+    const reason = rejectReason[`settlement-${batchId}`];
+    if (!reason?.trim()) {
+      log("Rejection requires reason", { batchId });
+      return;
+    }
+    await apiFetch(`/v1/admin/settlements/${batchId}/reject`, {
+      method: "POST",
+      body: JSON.stringify({ reason }),
+    });
+    log("Settlement rejected", { batchId, reason });
+    loadSettlements();
+  };
+
   const createApiKey = async () => {
     try {
       const payload = await apiFetch("/v1/admin/api-keys", {
@@ -325,6 +388,56 @@ export default function AdminPortalPage() {
     }
   };
 
+  const createAdminAccount = async () => {
+    setSecurityMessage("");
+    if (!newAdminEmail || !newAdminPassword) {
+      setSecurityMessage("Email and password are required.");
+      return;
+    }
+    try {
+      const payload = await apiFetch("/v1/admin/users/admins", {
+        method: "POST",
+        body: JSON.stringify({
+          email: newAdminEmail,
+          password: newAdminPassword,
+        }),
+      });
+      setNewAdminToken(payload.token || "");
+      setSecurityMessage("Admin account created.");
+      log("Admin account created", payload);
+    } catch (error) {
+      setSecurityMessage(`Create admin failed: ${String(error)}`);
+    }
+  };
+
+  const changePassword = async () => {
+    setSecurityMessage("");
+    if (!passwordCurrent || !passwordNext) {
+      setSecurityMessage("Current and new password are required.");
+      return;
+    }
+    if (passwordNext !== passwordConfirm) {
+      setSecurityMessage("New password confirmation does not match.");
+      return;
+    }
+    try {
+      await apiFetch("/v1/auth/password", {
+        method: "POST",
+        body: JSON.stringify({
+          currentPassword: passwordCurrent,
+          newPassword: passwordNext,
+        }),
+      });
+      setPasswordCurrent("");
+      setPasswordNext("");
+      setPasswordConfirm("");
+      setSecurityMessage("Password updated.");
+      log("Password updated", { email });
+    } catch (error) {
+      setSecurityMessage(`Password update failed: ${String(error)}`);
+    }
+  };
+
   const pendingDevelopers = developers.filter((dev) => dev.status === "PENDING_APPROVAL");
   const pendingGames = games.filter((game) => game.status === "PENDING_APPROVAL");
   const pendingRates = rates.filter((rate) => rate.status === "PENDING");
@@ -334,6 +447,12 @@ export default function AdminPortalPage() {
     games.forEach((game) => map.set(game.id, game.name));
     return map;
   }, [games]);
+
+  const developerNameById = useMemo(() => {
+    const map = new Map<string, string>();
+    developers.forEach((dev) => map.set(dev.id, dev.name));
+    return map;
+  }, [developers]);
 
   return (
     <div className={styles.page}>
@@ -378,7 +497,9 @@ export default function AdminPortalPage() {
           { id: "summaries", label: "Developer totals" },
           { id: "transactions", label: "Transactions" },
           { id: "receivables", label: "Receivables" },
+          { id: "settlements", label: "Settlements" },
           { id: "keys", label: "API keys" },
+          { id: "security", label: "Security" },
         ].map((tab) => (
           <button
             key={tab.id}
@@ -605,6 +726,73 @@ export default function AdminPortalPage() {
         </section>
       )}
 
+      {activeTab === "settlements" && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>Settlement approvals</h2>
+            <p>Review and approve developer settlement requests.</p>
+            <button className={styles.secondaryButton} onClick={loadSettlements}>
+              Refresh settlements
+            </button>
+          </div>
+          <div className={styles.table}>
+            {settlements.map((batch) => {
+              const batchId = batch.batchId || batch.id || "";
+              const isPending = batch.status === "REQUESTED";
+              const developerLabel =
+                (batch.developerId && developerNameById.get(batch.developerId)) ||
+                batch.developerId ||
+                "-";
+              return (
+                <div key={batchId} className={styles.tableRow}>
+                  <div>
+                    <strong>{batch.status}</strong>
+                    <p className={styles.muted}>{batch.requestedAt || ""}</p>
+                  </div>
+                  <div className={styles.muted}>{developerLabel}</div>
+                  <div>
+                    {batch.totalAmount} {batch.currency}
+                  </div>
+                  <div className={styles.actions}>
+                    {isPending ? (
+                      <>
+                        <input
+                          placeholder="Rejection reason"
+                          value={rejectReason[`settlement-${batchId}`] || ""}
+                          onChange={(event) =>
+                            setRejectReason((prev) => ({
+                              ...prev,
+                              [`settlement-${batchId}`]: event.target.value,
+                            }))
+                          }
+                        />
+                        <div className={styles.actionRow}>
+                          <button
+                            className={styles.successButton}
+                            onClick={() => approveSettlement(batchId)}
+                            disabled={!batchId}
+                          >
+                            Approve
+                          </button>
+                          <button
+                            className={styles.dangerButton}
+                            onClick={() => rejectSettlement(batchId)}
+                            disabled={!batchId}
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </>
+                    ) : (
+                      <span className={styles.muted}>No actions available</span>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      )}
       {activeTab === "keys" && (
         <section className={styles.section}>
           <div className={styles.sectionHeader}>
@@ -650,6 +838,75 @@ export default function AdminPortalPage() {
               </div>
             </div>
           </div>
+        </section>
+      )}
+
+      {activeTab === "security" && (
+        <section className={styles.section}>
+          <div className={styles.sectionHeader}>
+            <h2>Security</h2>
+            <p>Create admin accounts and manage your own credentials.</p>
+          </div>
+          <div className={styles.keyGrid}>
+            <div className={styles.panel}>
+              <h3>Create admin account</h3>
+              <label>
+                Admin email
+                <input
+                  value={newAdminEmail}
+                  onChange={(event) => setNewAdminEmail(event.target.value)}
+                />
+              </label>
+              <label>
+                Temporary password
+                <input
+                  type="password"
+                  value={newAdminPassword}
+                  onChange={(event) => setNewAdminPassword(event.target.value)}
+                />
+              </label>
+              <button className={styles.primaryButton} onClick={createAdminAccount}>
+                Create admin
+              </button>
+              {newAdminToken ? (
+                <div className={styles.keyResult}>
+                  <p>New admin token</p>
+                  <code>{newAdminToken}</code>
+                </div>
+              ) : null}
+            </div>
+            <div className={styles.panel}>
+              <h3>Change your password</h3>
+              <label>
+                Current password
+                <input
+                  type="password"
+                  value={passwordCurrent}
+                  onChange={(event) => setPasswordCurrent(event.target.value)}
+                />
+              </label>
+              <label>
+                New password
+                <input
+                  type="password"
+                  value={passwordNext}
+                  onChange={(event) => setPasswordNext(event.target.value)}
+                />
+              </label>
+              <label>
+                Confirm new password
+                <input
+                  type="password"
+                  value={passwordConfirm}
+                  onChange={(event) => setPasswordConfirm(event.target.value)}
+                />
+              </label>
+              <button className={styles.primaryButton} onClick={changePassword}>
+                Update password
+              </button>
+            </div>
+          </div>
+          {securityMessage ? <p className={styles.muted}>{securityMessage}</p> : null}
         </section>
       )}
 
