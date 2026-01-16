@@ -1,7 +1,7 @@
 # MGX Agent Brief
 
 ## What this repo is
-MGX (Mastercard Game Exchange): localhost-only platform where users convert Bank Reward Points -> MGC wallet,
+Game Exchange: localhost-only platform where users convert Bank Reward Points -> MGC wallet,
 spend MGC -> UGC per game, and each purchase creates a developer receivable (UNSETTLED). Developers
 trigger settlement on-demand (batch/pull model). FX is cached and refreshed twice daily. Each receivable stores
 the FX window snapshot used so settlement is deterministic.
